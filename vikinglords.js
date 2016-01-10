@@ -1605,29 +1605,6 @@ if (Meteor.isClient) {
       });
     },
 
-    "click button.sacrifice-viking": function() {
-      var game = Template.parentData(0);
-      var gameId = game._id;
-      var currentPlayerIndex = game.currentState.currentPlayerIndex;
-
-      var players = game.currentState.players;
-      var player = players[currentPlayerIndex];
-
-      var rareResource = player.resourcePicks.rare;
-      player.stash[rareResource] = player.stash[rareResource] - 1;
-      player.clansmen[VIKING] = player.clansmen[VIKING] - 1;
-      if (player.clansmen[SKALD] > 0) {
-        player.stash[EINHERJAR] = player.stash[EINHERJAR] + 1;
-      }
-      alert("You should get an offering");
-
-      Games.update(gameId, {
-        $set: {
-          "currentState.players": players
-        }
-      });
-    },
-
     "click button.perform-skald": function() {
       var game = Template.parentData(0);
       var gameId = game._id;

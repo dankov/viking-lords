@@ -203,7 +203,7 @@
 		<tr>
 			<td>{{#if isUser}}<em>You - </em>{{/if}}{{user.name}}</td>
 			<td>{{clansmen.skald}}{{#if isUser}}{{#if isUsersTurn2}}<button class="perform-skald">Perform</button><button class="sacrifice-skald">Sacrifice</button>{{/if}}{{/if}}</td>
-			<td>{{clansmen.viking}}{{#if isUser}}{{#if isUsersTurn2}}<button class="sacrifice-viking">Sacrifice</button>{{/if}}{{/if}}</td>
+			<td>{{clansmen.viking}}</td>
 		</tr>
 		{{/each}}
 		</table>
@@ -449,7 +449,6 @@
 
 <template name="todo">
   <ul>
-    <li>Give offerings when sacrificing vikings</li>
     <li>Buying lead viking doesn't use up a slot</li>
     <li>Cycle resource pick order correctly</li>
     <li>End game screen</li>
@@ -459,7 +458,6 @@
     <li>Log actions</li>
     <li>Version control</li>
     <li>Clean up code</li>
-    <li>Remove dead rules (like no sacrificing vikings)</li>
     <li>Give confirmation when server has accepted an action</li>
     <li>Make sure all actions are updated in the db atomically</li>
   </ul>
