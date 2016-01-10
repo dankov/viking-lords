@@ -1955,14 +1955,13 @@ if (Meteor.isClient) {
         }
       }
 
-      var playerPrestige = player.stash[PRESTIGE];
-      if (playerPrestige >= 0) {
-        player.stash[GELD] = player.stash[GELD] - playerPrestige;
-      } else {
-        player.stash[GELD] = player.stash[GELD] - 1;
+      var cost = player.stash[PRESTIGE];
+      if (cost < 1) {
+        cost = 1;
       }
+      player.stash[GELD] = player.stash[GELD] - cost;
       player.stash[WEREGELD] = player.stash[WEREGELD] - 1;
-      payee.stash[GELD] = payee.stash[GELD] + playerPrestige;
+      payee.stash[GELD] = payee.stash[GELD] + cost;
       var weregeldPayedIndex;
       for (i = 0; i < player.weregeldOwed.length; i++) {
         if (player.weregeldOwed[i].user._id === payeeId) {
