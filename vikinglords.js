@@ -36,7 +36,9 @@ var BLUE = "blue",
   TRADING_POST = "Trading Post",
   TRIBUTE = "Tribute to Jarl",
   END_GAME = "End Game",
-  LEAD_VIKING = "Lead Viking";
+  LEAD_VIKING = "Lead Viking",
+  STEP_SETUP = "setup",
+  STEP_PLAY = "play";
 
 ////////////////////////////////////////////////////////////////////////////////
 // Initialize collections
@@ -108,6 +110,108 @@ function shuffle(array) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Game Helpers
+////////////////////////////////////////////////////////////////////////////////
+
+// Returns the player object for the player whose turn it is for the game
+// passed in. This function is in no way based on who the currently logged in
+// user is for this client.
+function getCurrentPlayer(game) {
+  var currentPlayerIndex = game.currentState.currentPlayerIndex;
+  var players = game.currentState.players;
+  var currentPlayer = players[currentPlayerIndex];
+
+  return currentPlayer;
+}
+
+// Modifies the game passed in so that it is the next players turn. This
+// method does not return anything.
+//
+// The backwards parameter is optional and defaults to false. If true is
+// passed in, the turn goes backwards one player instead of forwards.
+function advanceTurn(game, backwards) {
+  var currentPlayerIndex = game.currentState.currentPlayerIndex;
+  var numPlayers = game.currentState.players.length;
+  backwards = backwards || false;
+
+  if(backwards) {
+    currentPlayerIndex = (numPlayers + currentPlayerIndex - 1) % numPlayers;
+  } else {
+    currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
+  }
+
+  game.currentState.currentPlayerIndex = currentPlayerIndex;
+}
+
+// Adds (or subtracts if negative) a given number of a given type of resource
+// from the given player. This does not return anything.
+function giveResources(player, resource, numberOfResources){
+  player.stash[resource] = player.stash[resource] + numberOfResources;
+}
+
+// Draw an omen card off the top of the deck and perform its effect. This
+// modifies the omen deck and the list of played omens. If a chaos omen is
+// drawn, the deck will be reshuffled and second omen will automatically be
+// drawn and played. This modifies the passsed in game, but does not return
+// anything.
+function drawOmen(game) {
+  // Remove the top omen from the omen deck.
+  var playedOmen = game.currentState.omenDeck.splice(0, 1).toString();
+
+  // If we get a chaos omen, keep drawing until we get a different omen.
+  // Before drawing again, clear the played omens and make a new,
+  // re-shuffled omen deck. Once we have our non-chaos omen, put it with the
+  // played omens.
+  while (playedOmen === CHAOS) {
+    game.currentState.playedOmens = [];
+    game.currentState.omenDeck = shuffle(game.omens);
+    playedOmen = game.currentState.omenDeck.splice(0, 1).toString();
+  }
+  game.currentState.playedOmens.push(playedOmen);
+
+  var players = game.currentState.players;
+  var i;
+  switch (playedOmen) {
+    case COMMON:
+      for (i = 0; i < players.length; i++) {
+        var commonResource = players[i].resourcePicks.common;
+        giveResources(players[i], commonResource, 1);
+      }
+      break;
+    case RARE:
+      for (i = 0; i < players.length; i++) {
+        var rareResource = players[i].resourcePicks.rare;
+        giveResources(players[i], rareResource, 1);
+      }
+      break;
+    case WAR:
+      var currentPlayer = getCurrentPlayer(game);
+      beginAttack(currentPlayer);
+      break;
+  }
+}
+
+// Sets up the given player to begin to attack. This function does not return
+// anything.
+function beginAttack(player) {
+  player.raiding = true;
+  player.decidingWhoToRaid = true;
+}
+
+// Move the passed in game from the setup step to the play step. This
+// involves switching the current step flag, setting the current player
+// to be the first player, and drawing the first omen. We need to draw
+// the first omen beacuse that is normally taken care of when a player
+// ends their turn, but no player is ending a turn to start the first
+// turn.
+function beginPlayStep(game) {
+  game.currentState.step = STEP_PLAY;
+  game.currentState.currentPlayerIndex = 0;
+
+  drawOmen(game);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Client side only code
 ////////////////////////////////////////////////////////////////////////////////
 if (Meteor.isClient) {
@@ -126,11 +230,11 @@ if (Meteor.isClient) {
       amplify.store(key, value);
     },
   });
-  
+
   //////////////////////////////////////////////////////////////////////////////
   // Constants
   //////////////////////////////////////////////////////////////////////////////
-  
+
   var USER = "user";
 
   //////////////////////////////////////////////////////////////////////////////
@@ -430,13 +534,13 @@ if (Meteor.isClient) {
     inSetupStep: function() {
       return this.currentState !== undefined &&
         this.currentState !== null &&
-        this.currentState.step === "setup";
+        this.currentState.step === STEP_SETUP;
     },
 
     inPlayStep: function() {
       return this.currentState !== undefined &&
         this.currentState !== null &&
-        this.currentState.step === "play";
+        this.currentState.step === STEP_PLAY;
     },
 
     isCurrentPlayer: function() {
@@ -527,7 +631,7 @@ if (Meteor.isClient) {
       Games.update(this._id, {
         $set: {
           currentState: {
-            step: "setup",
+            step: STEP_SETUP,
             players: gamePlayers,
             currentPlayerIndex: 0,
             availableCommonResources: [BLUE, GREEN, RED,
@@ -580,133 +684,50 @@ if (Meteor.isClient) {
   Template.setupStep.events({
     "click button.pick-common": function() {
       var game = Template.parentData(0);
-      var gameId = game._id;
-      var currentPlayerIndex = game.currentState.currentPlayerIndex;
-      var pickedResource = this.toString();
+      var currentPlayer = getCurrentPlayer(game);
+      var selectedResource = this.toString();
 
-      var availableCommonResources = game.currentState.availableCommonResources;
-      var pickedResourceIndex =
-        availableCommonResources.indexOf(pickedResource);
-      availableCommonResources.splice(pickedResourceIndex, 1);
-      Games.update(gameId, {
-        $set: {
-          "currentState.availableCommonResources": availableCommonResources
-        }
-      });
+      // Remove the selected common resource from the list of available
+      // common resources.
+      var availableCommons = game.currentState.availableCommonResources;
+      var selectedResourceIndex = availableCommons.indexOf(selectedResource);
+      availableCommons.splice(selectedResourceIndex, 1);
 
-      var players = game.currentState.players;
-      players[currentPlayerIndex].resourcePicks.common = pickedResource;
-      Games.update(gameId, {
-        $set: {
-          "currentState.players": players
-        }
-      });
+      currentPlayer.resourcePicks.common = selectedResource;
 
-      var numPlayers = game.currentState.players.length;
-      currentPlayerIndex =
-        (currentPlayerIndex + 1) % numPlayers;
-      Games.update(gameId, {
-        $set: {
-          "currentState.currentPlayerIndex": currentPlayerIndex
-        }
-      });
+      // Advance the turn, but only if this is not the last player. We do not
+      // advance if is the last player because they should be the first to
+      // pick a rare resource.
+      if(!currentPlayer.lastViking) {
+        advanceTurn(game);
+      }
+
+      Games.update(game._id, game);
     },
 
     "click button.pick-rare": function() {
       var game = Template.parentData(0);
-      var gameId = game._id;
-      var currentPlayerIndex = game.currentState.currentPlayerIndex;
-      var pickedResource = this.toString();
+      var currentPlayer = getCurrentPlayer(game);
+      var selectedResource = this.toString();
 
-      var availableRareResources = game.currentState.availableRareResources;
-      var pickedResourceIndex =
-        availableRareResources.indexOf(pickedResource);
-      availableRareResources.splice(pickedResourceIndex, 1);
-      Games.update(gameId, {
-        $set: {
-          "currentState.availableRareResources": availableRareResources
-        }
-      });
+      // Remove the selected rare resource from the list of available rare
+      // resources.
+      var availableRares = game.currentState.availableRareResources;
+      var selectedResourceIndex = availableRares.indexOf(selectedResource);
+      availableRares.splice(selectedResourceIndex, 1);
 
-      var players = game.currentState.players;
-      players[currentPlayerIndex].resourcePicks.rare = pickedResource;
-      Games.update(gameId, {
-        $set: {
-          "currentState.players": players
-        }
-      });
+      currentPlayer.resourcePicks.rare = selectedResource;
 
-      var allRaresPicked = true;
-      for (var i = 0; i < players.length; i++) {
-        if (players[i].resourcePicks.rare === null) {
-          allRaresPicked = false;
-        }
-      }
-      if (allRaresPicked) {
-        Games.update(gameId, {
-          $set: {
-            "currentState.currentPlayerIndex": 0
-          }
-        });
-        Games.update(gameId, {
-          $set: {
-            "currentState.step": "play"
-          }
-        });
-        var playedOmen = game.currentState.omenDeck.splice(0, 1).toString();
-        while (playedOmen === CHAOS) {
-          game.currentState.playedOmens = [];
-          game.currentState.omenDeck = shuffle(game.omens);
-          playedOmen = game.currentState.omenDeck.splice(0, 1).toString();
-        }
-        game.currentState.playedOmens.push(playedOmen);
-        switch (playedOmen) {
-          case COMMON:
-            for (i = 0; i < players.length; i++) {
-              var commonResource = players[i].resourcePicks.common;
-              players[i].stash[commonResource] =
-                players[i].stash[commonResource] + 1;
-            }
-            Games.update(gameId, {
-              $set: {
-                "currentState.players": players
-              }
-            });
-            break;
-          case RARE:
-            for (i = 0; i < players.length; i++) {
-              var rareResource = players[i].resourcePicks.rare;
-              players[i].stash[rareResource] =
-                players[i].stash[rareResource] + 1;
-            }
-            Games.update(gameId, {
-              $set: {
-                "currentState.players": players
-              }
-            });
-            break;
-          case WAR:
-            break;
-        }
-        Games.update(gameId, {
-          $set: {
-            "currentState.omenDeck": game.currentState.omenDeck
-          }
-        });
-        Games.update(gameId, {
-          $set: {
-            "currentState.playedOmens": game.currentState.playedOmens
-          }
-        });
+      // If we haven't reached the lead viking, we go backwards in turn order to
+      // finish picking rares. Once we reach the lead viking, we end the setup
+      // step and move to the play step.
+      if(!currentPlayer.leadViking) {
+        advanceTurn(game, /*backwards*/ true);
       } else {
-        var numPlayers = game.currentState.players.length;
-        currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
-        Games.update(gameId, {
-          $set: {
-            "currentState.currentPlayerIndex": currentPlayerIndex
-          }
-        });
+        beginPlayStep(game);
       }
+
+      Games.update(game._id, game);
     },
   });
 
@@ -852,7 +873,7 @@ if (Meteor.isClient) {
         Template.parentData(0)
           .currentState
           .players[currentPlayerIndex]
-          .raidTakeNumLeft > 0 && 
+          .raidTakeNumLeft > 0 &&
         !Template.parentData(0)
           .currentState
           .players[currentPlayerIndex]
