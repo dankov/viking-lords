@@ -1372,10 +1372,8 @@ if (Meteor.isClient) {
         case ACTION:
           switch (item.name) {
             case ATTACK:
-              if (player.clansmen[VIKING] > 0) {
-                player.raiding = true;
-                player.decidingWhoToRaid = true;
-              }
+              player.raiding = true;
+              player.decidingWhoToRaid = true;
               break;
             case OFFERING:
               var playedOffering = game.currentState.offeringDeck.splice(
