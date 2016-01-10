@@ -1,0 +1,463 @@
+<head>
+  <title>viking Lords</title>
+</head>
+<body>
+</body>
+
+<template name="lobby">
+	{{#if isSignedIn}}
+		{{> welcome}}
+		{{> myGames }}
+		{{> createGame}}
+		{{> joinGame}}
+	{{else}}
+		{{> signIn}}
+	{{/if}}
+</template>
+
+<template name="signIn">
+	<h1>Sign In</h1>
+	<form>
+		<input type="text" name="userName" />
+		<input type="submit" value="Sign In" />
+    </form>
+</template>
+
+<template name="welcome">
+	<h1>Welcome "{{userName}}"</h1>
+	<form>
+		<input type="submit" value="Sign Out" />
+    </form>
+</template>
+
+<template name="myGames">
+	<h1>My Games</h1>
+	{{#each myGames}}
+		<form action="/games/{{_id}}">
+			{{status}} - <input type="submit" value="Play {{name}}">
+		</form>
+	{{/each}}
+</template>
+
+<template name="createGame">
+	<h1>Create Game</h1>
+	<form>
+		<input type="text" name="gameName" />
+		<input type="submit" value="Create Game" />
+    </form>
+</template>
+
+<template name="joinGame">
+	<h1>Join Game</h1>
+	{{#each openGames}}
+		<form action="/games/{{_id}}">
+			{{numberOfPlayers}}/4 players - <input type="submit" value="Join {{name}}">
+		</form>
+	{{/each}}
+</template>
+
+<template name="game">
+	<h1>You're in {{name}}</h1>
+	<p><em>Created by {{creator.name}} on {{creationTime}}</em></p>
+	<p>There are currently {{numberOfPlayers}} players:{{#each players}}{{name}},{{/each}}</p>
+	<div>
+		{{#if canStart}}
+		<button class="start-game">Start Game</button>
+		{{/if}}
+		{{#if isComplete}}
+			<h1>Game Over!</h1>
+		{{/if}}
+		{{#if isStarted}}
+			Players:
+			<table>
+			<tr>
+				<td>Name</td>
+				<td>Current Turn</td>
+				<td>Lead Viking</td>
+				<td>Last Player For Round</td>
+				<td>Common</td>
+				<td>Rare</td>
+			</tr>
+			{{#each currentState.players}}
+			<tr>
+				<td>{{#if isUser}}<em>You - </em>{{/if}}{{user.name}}</td>
+				<td>{{#if isCurrentPlayer}}Yes{{/if}}</td>
+				<td>{{#if leadViking}}Yes{{/if}}</td>
+				<td>{{#if lastViking}}Yes{{/if}}</td>
+				<td>{{resourcePicks.common}}</td>
+				<td>{{resourcePicks.rare}}</td>
+			</tr>
+			{{/each}}
+			</table>
+		{{/if}}
+		{{#if inSetupStep}}
+			{{> setupStep}}
+		{{/if}}
+		{{#if inPlayStep}}
+			{{> playStep}}
+		{{/if}}
+		<form action="/">
+			<input type="submit" value="Leave game">
+		</form>
+	</div>
+</template>
+
+<template name="setupStep">
+	<h1>Choose Resources</h1>
+	{{#if needToPickCommon}}
+		<h2>Common Resources</h2>
+		<ul>
+		{{#each currentState.availableCommonResources}}
+			<li>{{this}}{{#if isUsersTurn}}<button class="pick-common">Pick</button>{{/if}}</li>
+		{{/each}}
+		</ul>
+	{{else}}
+		<h2>Rare Resources</h2>
+		<ul>
+		{{#each currentState.availableRareResources}}
+			<li>{{this}}{{#if isUsersTurn}}<button class="pick-rare">Pick</button>{{/if}}</li>
+		{{/each}}
+		</ul>
+	{{/if}}
+</template>
+
+<template name="playStep">
+	<h1>Let's Play!</h1>
+	<h2>Decks</h2>
+	<h3>Omens</h3>
+	<ol>
+	{{#each currentState.playedOmens}}
+		<li>{{this}}</li>
+	{{/each}}
+	</ol>
+	<h3>Offerings</h3>
+	<ol>
+	{{#each currentState.playedOfferings}}
+		<li>{{this}}</li>
+	{{/each}}
+	</ol>
+	
+	<h2>Stuff</h2>
+	<h3>Stash:</h3>
+	<table>
+	<tr>
+		<td>Name</td>
+		<td>Blue</td>
+		<td>Green</td>
+		<td>Red</td>
+		<td>Purple</td>
+		<td>Geld</td>
+		<td>Gods</td>
+		<td>Prestige</td>
+		<td>Einherjar</td>
+		<td>Weregeld</td>
+	</tr>
+	{{#each currentState.players}}
+	<tr>
+		<td>{{#if isUser}}<em>You - </em>{{/if}}{{user.name}}</td>
+		<td>{{stash.blue}}{{#if canTrade}}<button class="give-resource" value="blue:{{user._id}}">Give 1</button>{{/if}}</td>
+		<td>{{stash.green}}{{#if canTrade}}<button class="give-resource" value="green:{{user._id}}">Give 1</button>{{/if}}</td>
+		<td>{{stash.red}}{{#if canTrade}}<button class="give-resource" value="red:{{user._id}}">Give 1</button>{{/if}}</td>
+		<td>{{stash.purple}}{{#if canTrade}}<button class="give-resource" value="purple:{{user._id}}">Give 1</button>{{/if}}</td>
+		<td>{{stash.geld}}{{#if canTrade}}<button class="give-resource" value="geld:{{user._id}}">Give 1</button>{{/if}}</td>
+		<td>{{stash.gods}}</td>
+		<td>{{stash.prestige}}</td>
+		<td>{{stash.einherjar}}</td>
+		<td>{{stash.weregeld}}</td>
+	</tr>
+	{{/each}}
+	</table>
+	
+	<h3>Structures:</h3>
+	<table>
+	<tr>
+		<td>Name</td>
+		<td>Taverns</td>
+		<td>Mead Halls</td>
+		<td>Longboats</td>
+	</tr>
+	{{#each currentState.players}}
+	<tr>
+		<td>{{#if isUser}}<em>You - </em>{{/if}}{{user.name}}</td>
+		<td>{{structures.tavern}}{{#if isUser}}<button class="activate-tavern">Convert 1 Rare To 1 Geld ({{structureUses.tavern}} uses left)</button>{{/if}}</td>
+		<td>{{structures.meadhall}}{{#if isUser}}<button class="activate-meadhall">Convert 1 Common To 1 Geld ({{structureUses.meadhall}} uses left)</button>{{/if}}</td>
+		<td>{{structures.longboat}}</td>
+	</tr>
+	{{/each}}
+	</table>
+	
+	{{#if currentPlayerGivingSkald}}
+		<h4>Choose who to give the Skald to:</h4>
+		{{#each currentState.players}}
+			{{#if isUser}}{{else}}<button class="give-skald" value="{{user._id}}">{{user.name}}</button>{{/if}}
+		{{/each}}
+	{{else}}
+		<h3>Clansmen:</h3>
+		<table>
+		<tr>
+			<td>Name</td>
+			<td>Skalds</td>
+			<td>Vikings</td>
+		</tr>
+		{{#each currentState.players}}
+		<tr>
+			<td>{{#if isUser}}<em>You - </em>{{/if}}{{user.name}}</td>
+			<td>{{clansmen.skald}}{{#if isUser}}{{#if isUsersTurn2}}<button class="perform-skald">Perform</button><button class="sacrifice-skald">Sacrifice</button>{{/if}}{{/if}}</td>
+			<td>{{clansmen.viking}}{{#if isUser}}{{#if isUsersTurn2}}<button class="sacrifice-viking">Sacrifice</button>{{/if}}{{/if}}</td>
+		</tr>
+		{{/each}}
+		</table>
+	{{/if}}
+	
+	<h3>Purchased:</h3>
+	<table>
+	<tr>
+		<td>Name</td>
+		<td>Taverns</td>
+		<td>Mead Halls</td>
+		<td>Longboats</td>
+	</tr>
+	{{#each currentState.players}}
+	<tr>
+		<td>{{#if isUser}}<em>You - </em>{{/if}}{{user.name}}</td>
+		<td>{{purchased.tavern}}</td>
+		<td>{{purchased.meadhall}}</td>
+		<td>{{purchased.longboat}}</td>
+	</tr>
+	{{/each}}
+	</table>
+	
+	<h2>Actions</h2>
+	<h3>Convert:</h3>
+	{{#if currentUserConvertingResources}}
+		Convert which resources?
+		<button class="convert" value="blue">Blue</button>
+		<button class="convert" value="green">Green</button>
+		<button class="convert" value="red">Red</button>
+		<button class="convert" value="purple">Purple</button>
+	{{else}}
+		<td>{{#if isUsersTurn}}<button class="convert-to-rare">Convert 2 Common to 1 Rare</button>{{/if}}</td>
+		<td>{{#if isUsersTurn}}<button class="convert-to-geld">Convert 4 Resources to 1 Geld</button>{{/if}}</td>
+	{{/if}}
+	
+	<h3>Shared Tracks</h3>
+	{{#if currentPlayerTrading}}
+		<h4>Make a trading post selection</h4>
+		{{#if currentPlayerTradingStep1}}
+			Which resource do you want to trade <b>away</b>?
+			<button class="trade-away" value="blue">Blue</button>
+			<button class="trade-away" value="green">Green</button>
+			<button class="trade-away" value="red">Red</button>
+			<button class="trade-away" value="purple">Purple</button>
+		{{else}}
+			Which resource do you want to trade <b>for</b>?
+			<button class="trade-for" value="blue">Blue</button>
+			<button class="trade-for" value="green">Green</button>
+			<button class="trade-for" value="red">Red</button>
+			<button class="trade-for" value="purple">Purple</button>
+		{{/if}}
+	{{else}}
+		<table>
+		<tr>
+			<td>Track</td>
+			<td>Cost #1</td>
+			<td>Cost #2</td>
+			<td>Cost #3</td>
+			<td>Cost #4</td>
+		</tr>	
+		{{#each currentState.sharedTracks}}
+		<tr>
+			<td>{{name}}</td>
+			{{#each buySlots}}
+				<td>
+					{{#if bought}}
+						<s>{{cost}}</s>
+					{{else}}
+						{{cost}}
+					{{/if}}
+					{{#if available}}
+						{{#if isUsersTurn3}}
+							<button class="buy-track" value="{{../name}}">Buy</button>
+						{{/if}}
+					{{/if}}
+				</td>
+			{{/each}}
+		</tr>
+		{{/each}}
+	</table>
+	{{/if}}
+	
+	{{#if currentPlayerRaiding}}
+	<h3>Attack</h3>
+		{{#if currentPlayerDecidingWhoToRaid}}
+			Who do you want to attack?
+			{{#each currentState.players}}
+				{{#if isUser}}
+				{{else}}
+					<button class="choose-who-to-raid" value="{{user._id}}">{{user.name}}</button>
+				{{/if}}				
+			{{/each}}
+			<button class="choose-who-to-raid" value="">Do not attack</button>
+		{{/if}}
+		{{#if currentPlayerDecidingHowToRaid}}
+			How do you want to attack?
+			<button class="choose-how-to-raid" value="take">Take stuff</button>
+			<button class="choose-how-to-raid" value="burn">Burn something</button>
+			<button class="choose-how-to-raid" value="both">Take stuff and burn something</button>
+		{{/if}}
+		{{#if currentPlayerWaitingOnDefender}}
+			Waiting for defender to decide whether or not to defend.
+		{{/if}}
+		{{#if currentPlayerDecidingWhatToBurn}}
+			What do you want to burn?
+			<button class="burn-structure" value="tavern">Tavern</button>
+			<button class="burn-structure" value="meadhall">Mead Hall</button>
+			<button class="burn-structure" value="longboat">Longboat</button>
+		{{/if}}
+		{{#if currentUserDecidingWhatToTake}}
+			What do you want to take?
+			<button class="steal-resource" value="blue">Blue</button>
+			<button class="steal-resource" value="green">Green</button>
+			<button class="steal-resource" value="red">Red</button>
+			<button class="steal-resource" value="purple">Purple</button>
+		{{/if}}
+	{{/if}}
+	
+	{{#if currentUserCollectingBounty}}
+		<h3>Offering - Bounty</h3>
+		Choose a resource to collect
+		<button class="collect-bounty" value="blue">Blue</button>
+		<button class="collect-bounty" value="green">Green</button>
+		<button class="collect-bounty" value="red">Red</button>
+		<button class="collect-bounty" value="purple">Purple</button>
+	{{/if}}
+	
+	{{#if currentUserSmiting}}
+		<h3>Offering - Smite</h3>
+		{{#if currentPlayerDecidingWhoToSmite}}
+			Who do you want to smite?
+			{{#each currentState.players}}
+				{{#if isUser}}
+				{{else}}
+					<button class="choose-who-to-smite" value="{{user._id}}">{{user.name}}</button>
+				{{/if}}				
+			{{/each}}
+			<button class="choose-who-to-smite" value="">Do not smite</button>
+		{{/if}}
+		{{#if currentPlayerDecidingWhatToSmite}}
+			What do you want to smite?
+			<button class="choose-what-to-smite" value="tavern">Tavern</button>
+			<button class="choose-what-to-smite" value="meadhall">Mead Hall</button>
+			<button class="choose-what-to-smite" value="longboat">Longboat</button>
+		{{/if}}
+	{{/if}}
+	
+	{{#if currentUserValkyring}}
+		<h3>Offering - Valkyrie</h3>
+		{{#if currentPlayerDecidingWhoToValkyrie}}
+			Who do you want to valkyrie?
+			{{#each currentState.players}}
+				{{#if isUser}}
+				{{else}}
+					<button class="choose-who-to-valkyrie" value="{{user._id}}">{{user.name}}</button>
+				{{/if}}				
+			{{/each}}
+			<button class="choose-who-to-valkyrie" value="">Do not valkyrie</button>
+		{{/if}}
+		{{#if currentPlayerDecidingWhatToValkyrie}}
+			What do you want to valkyrie?
+			<button class="choose-what-to-valkyrie" value="viking">Viking</button>
+			<button class="choose-what-to-valkyrie" value="skald">Skald</button>
+		{{/if}}
+	{{/if}}
+	
+	{{#if currentUserBeingScourged}}
+		<h3>Offering - Scourge</h3>
+		Choose a resource to destroy
+		<button class="scourge-resource" value="blue">Blue</button>
+		<button class="scourge-resource" value="green">Green</button>
+		<button class="scourge-resource" value="red">Red</button>
+		<button class="scourge-resource" value="purple">Purple</button>
+	{{/if}}
+	
+	{{#if currentUserUnderAttack}}
+	<h3>Defend</h3>
+		Sacrifice a Viking to defend your village?
+		<button class="defend-attack" value="true">Yes</button>
+		<button class="defend-attack" value="false">No</button>
+	{{/if}}
+	
+	<h3>MarketPlace:</h3>
+	<table>
+	<tr>
+		<td>Stucture</td>
+		<td>Blue</td>
+		<td>Green</td>
+		<td>Red</td>
+		<td>Purple</td>
+		<td></td>
+	</tr>
+	{{#each marketplace}}
+	<tr>
+		<td>{{name}}</td>
+		<td>{{blue}}</td>
+		<td>{{green}}</td>
+		<td>{{red}}</td>
+		<td>{{purple}}</td>
+		<td>{{#if isUsersTurn2}}<button class="buy-marketplace" value="{{name}}">Buy</button>{{/if}}</td>
+	</tr>
+	{{/each}}
+	</table>
+	
+	<h3>Pay Weregeld:</h3>
+	<ul>
+	{{#if isUsersTurn}}
+		{{#each currentUserWeregeld}}
+			<li><button class="pay-weregeld" value="{{user._id}}">Pay {{user.name}}</button></li>
+		{{/each}}
+	{{/if}}
+	</ul>
+	
+	<h3>End Turn:</h3>
+	{{#if isUsersTurn}}
+		<button class="end-turn">End Turn</button>
+	{{/if}}
+	
+	<h2>Cheat</h2>
+	<h3>Gimme:</h3>
+	<button class="raid-common">Commons for Everyone!</button>
+	<button class="raid-rare">Rares for Everyone!</button>
+	
+	<h3>Reset:</h3>
+	<button class="reset-raids">Cancel all raids</button>
+	<button class="reset-offerings">Cancel all offerings</button>
+	
+	<h3>Peek:</h3>
+	<h4>Omen Deck:</h4>
+	<ol>
+	{{#each currentState.omenDeck}}
+		<li>{{this}}</li>
+	{{/each}}
+	</ol>
+	<h4>Offering Deck:</h4>
+	<ol>
+	{{#each currentState.offeringDeck}}
+		<li>{{this}}</li>
+	{{/each}}
+	</ol>
+</template>
+
+<template name="todo">
+	<ul>
+		<li>Give offerings when sacrificing vikings</li>
+		<li>Buying lead viking doesn't use up a slot</li>
+		<li>Cycle resource pick order correctly</li>
+		<li>End game screen</li>
+		<li>Make prettier</li>
+		<li>Don't allow actions that can't be taken</li>
+		<li>Make action with decisions modal</li>
+		<li>Log actions</li>
+		<li>Version control</li>
+		<li>Clean up code</li>
+	</ul>
+</template>
