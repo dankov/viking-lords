@@ -1,59 +1,104 @@
 <head>
-  <title>viking Lords</title>
+  <title>Viking Lords</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
 </body>
 
 <template name="lobby">
-	{{#if isSignedIn}}
-		{{> welcome}}
-		{{> myGames }}
-		{{> createGame}}
-		{{> joinGame}}
-	{{else}}
-		{{> signIn}}
-	{{/if}}
+  <div class="container">
+    {{#if isSignedIn}}
+      {{> welcome}}
+      <div class="row">
+        <div class="col-lg-4">
+          {{> myGames }}
+        </div>
+        <div class="col-lg-4">
+          {{> createGame}}
+        </div>
+        <div class="col-lg-4">
+          {{> joinGame}}
+        </div>
+      </div>
+    {{else}}
+      {{> signIn}}
+    {{/if}}
+  </div>
 </template>
 
 <template name="signIn">
-	<h1>Sign In</h1>
-	<form>
-		<input type="text" name="userName" />
-		<input type="submit" value="Sign In" />
-    </form>
+  <h1>Sign In</h1>
+  <form class="form-horizontal">
+    <div class="form-group">
+      <label for="username" class="col-lg-1 control-label">Username</label>
+      <div class="col-lg-3">
+        <input type="text" class="form-control" name="username" id="username" placeholder="username" />
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-lg-offset-1 col-lg-1">
+        <button type="submit" class="btn btn-default">Sign In</button>
+      </div>
+    </div>
+  </form>
 </template>
 
 <template name="welcome">
-	<h1>Welcome "{{userName}}"</h1>
-	<form>
-		<input type="submit" value="Sign Out" />
-    </form>
+  <h1>Welcome {{userName}}!</h1>
+  <button class="sign-out btn btn-default text-center btn-xs">Sign Out</button>
 </template>
 
 <template name="myGames">
-	<h1>My Games</h1>
-	{{#each myGames}}
-		<form action="/games/{{_id}}">
-			{{status}} - <input type="submit" value="Play {{name}}">
-		</form>
-	{{/each}}
+	<h2>My Games</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Status</th> 
+        <th></th>
+      </tr>
+    </thead>
+    {{#each myGames}}
+      <tr>
+        <td>{{name}}</td>
+        <td>{{status}}</td>
+        <td><a href="/games/{{_id}}" class="btn btn-default">Play</a></td>
+      </tr>
+    {{/each}}
+  </table>
 </template>
 
 <template name="createGame">
-	<h1>Create Game</h1>
-	<form>
-		<input type="text" name="gameName" />
-		<input type="submit" value="Create Game" />
-    </form>
+  <h2>Create Game</h2>
+  <form>
+    <div class="form-group">
+      <label for="gameName" class="control-label">Name</label>
+      <input type="text" class="form-control" name="gameName" id="gameName" placeholder="Game name" />
+    </div>
+    <div class="form-group">
+      <button type="submit" class="btn btn-default">Create</button>
+    </div>
+  </form>
 </template>
 
 <template name="joinGame">
-	<h1>Join Game</h1>
-	{{#each openGames}}
-		<form action="/games/{{_id}}">
-			{{numberOfPlayers}}/4 players - <input type="submit" value="Join {{name}}">
-		</form>
-	{{/each}}
+  <h2>Join Game</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Players</th>
+        <th></th>
+      </tr>
+    </thead>
+    {{#each openGames}}
+      <tr>
+        <td>{{name}}</td>
+        <td>{{numberOfPlayers}}/4</td>
+        <td><button class="join-game btn btn-default">Join</button></td>
+      </tr>
+    {{/each}}
+  </table>
 </template>
 
 <template name="game">
@@ -450,7 +495,7 @@
         <li>Show marketplace costs when picking resources</li>
         <li>Add tips during resource picking about which resource you are making easy/excluding</li>
         <li>Show all stuff for a single player in one place rather than multiple tables</li>
-        <li>Add colors</li>
+        <li>Boostrapify the game page</li>
       </ul>
     <li>Don't allow actions that can't be taken</li>
     <li>Make action with decisions modal</li>

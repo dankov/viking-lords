@@ -280,21 +280,22 @@ if (Meteor.isClient) {
   });
 
   Template.welcome.events({
-    "submit form": function() {
+    "click button.sign-out": function() {
       AmplifiedSession.set('user', null);
     }
   });
 
   Template.signIn.events({
     "submit form": function(event) {
-      var userName = event.target.userName.value;
+      event.preventDefault();
+      var username = event.target.username.value;
       var user = Users.findOne({
-        name: userName
+        name: username
       });
       if (user === null || user === undefined) {
         var userId = Users.insert({
           createdAt: new Date(),
-          name: userName
+          name: username
         });
 
         user = Users.findOne(userId);
@@ -337,7 +338,7 @@ if (Meteor.isClient) {
   });
 
   Template.joinGame.events({
-    "submit form": function() {
+    "click button.join-game": function() {
       var players = this.players;
       players.push(AmplifiedSession.get(USER));
 
