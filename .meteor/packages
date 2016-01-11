@@ -22,3 +22,4 @@ iron:router
 amplify
 underscore
 twbs:bootstrap
+fortawesome:fontawesome

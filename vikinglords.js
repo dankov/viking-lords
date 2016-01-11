@@ -124,6 +124,25 @@ function getCurrentPlayer(game) {
   return currentPlayer;
 }
 
+// Returns the player object for the user who is currently logged in. This
+// function is in no way based on which player's turn it currently is. Note
+// that this returns the player object, not the user object.
+function getUserPlayer(game) {
+  return getPlayerFromUserId(game, AmplifiedSession.get(USER)._id);
+}
+
+// Returns the player object whose user has the given userId. Note this returns
+// the player object, not the user object.
+function getPlayerFromUserId(game, userId) {
+  var players = game.currentState.players;
+
+  for (var i = 0; i < players.length; i++) {
+    if (players[i].user._id === userId) {
+      return players[i];
+    }
+  }
+}
+
 // Modifies the game passed in so that it is the next players turn. This
 // method does not return anything.
 //
@@ -147,6 +166,13 @@ function advanceTurn(game, backwards) {
 // from the given player. This does not return anything.
 function giveResources(player, resource, numberOfResources){
   player.stash[resource] = player.stash[resource] + numberOfResources;
+}
+
+// Transfers a given number of a given type of resource from one player to
+// another player. This does not return anything.
+function transferResources(fromPlayer, toPlayer, resource, numberOfResources){
+  giveResources(fromPlayer, resource, -1 * numberOfResources);
+  giveResources(toPlayer, resource, numberOfResources);
 }
 
 // Draw an omen card off the top of the deck and perform its effect. This
@@ -533,12 +559,21 @@ if (Meteor.isClient) {
   });
 
   Template.game.helpers({
-    numberOfPlayers: function() {
-      return this.players.length;
+    playerList: function() {
+      var names = [];
+      for(var i = 0; i < this.players.length; i++) {
+        names.push(this.players[i].name);
+      }
+      return names.join();
+    },
+
+    isOpen: function() {
+      return this.status === "open";
     },
 
     canStart: function() {
-      return this.status === "open";
+      return this.status === "open" &&
+        this.players.length > 1;
     },
 
     isStarted: function() {
@@ -689,7 +724,7 @@ if (Meteor.isClient) {
     },
 
     needToPickCommon: function() {
-      var players = Template.parentData(0).currentState.players;
+      var players = Template.parentData(1).currentState.players;
       for (var i = 0; i < players.length; i++) {
         if (players[i].resourcePicks.common === null) {
           return true;
@@ -981,32 +1016,6 @@ if (Meteor.isClient) {
           .currentState
           .players[currentPlayerIndex]
           .valkyrieTargetUserId !== null;
-    },
-
-    canTrade: function() {
-      var currentPlayerIndex =
-        Template.parentData(1).currentState.currentPlayerIndex;
-      var currentPlayerUser = Template.parentData(1).currentState.players[
-        currentPlayerIndex].user;
-      var currentUser = AmplifiedSession.get(USER);
-      var selectedUser = this.user;
-
-      // You can't ever trade with yourself
-      if (currentUser._id === selectedUser._id) {
-        return false;
-      }
-
-      // You can trade with the person whose turn it is
-      if (selectedUser._id === currentPlayerUser._id) {
-        return true;
-      }
-
-      // If it is your turn, you can trade with anyone
-      if (currentUser._id === currentPlayerUser._id) {
-        return true;
-      }
-
-      return false;
     },
 
     currentUserWeregeld: function() {
@@ -1719,36 +1728,6 @@ if (Meteor.isClient) {
       });
     },
 
-    "click button.give-resource": function(event) {
-      var game = Template.parentData(0);
-      var gameId = game._id;
-      var givingPlayerId = AmplifiedSession.get(USER)._id;
-      var data = event.target.value;
-      var resourceName = data.split(":")[0];
-      var receivingPlayerId = data.split(":")[1];
-
-      var players = game.currentState.players;
-      var givingPlayer;
-      var receivingPlayer;
-      for (var i = 0; i < players.length; i++) {
-        if (players[i].user._id === givingPlayerId) {
-          givingPlayer = players[i];
-        }
-        if (players[i].user._id === receivingPlayerId) {
-          receivingPlayer = players[i];
-        }
-      }
-
-      givingPlayer.stash[resourceName] = givingPlayer.stash[resourceName] - 1;
-      receivingPlayer.stash[resourceName] = receivingPlayer.stash[
-        resourceName] + 1;
-      Games.update(gameId, {
-        $set: {
-          "currentState.players": players
-        }
-      });
-    },
-
     "click button.choose-who-to-raid": function(event) {
       var game = Template.parentData(0);
       var gameId = game._id;
@@ -2165,6 +2144,50 @@ if (Meteor.isClient) {
           "currentState.players": players
         }
       });
+    },
+  });
+
+  Template.stash.helpers({
+    isUser: function() {
+      return AmplifiedSession.get(USER)._id === this.user._id;
+    },
+
+    canTrade: function() {
+      var game = Template.parentData(1);
+      var currentPlayer = getCurrentPlayer(game);
+      var currentUser = AmplifiedSession.get(USER);
+      var userToTradeWith = this.user;
+
+      // You can't ever trade with yourself
+      if (currentUser._id === userToTradeWith._id) {
+        return false;
+      }
+
+      // You can trade with the person whose turn it is
+      if (userToTradeWith._id === currentPlayer.user._id) {
+        return true;
+      }
+
+      // If it is your turn, you can trade with anyone
+      if (currentUser._id === currentPlayer.user._id) {
+        return true;
+      }
+
+      return false;
+    }
+  });
+
+  Template.stash.events({
+    "click button.give-resource": function(event) {
+      var game = Template.parentData(0);
+      var resourceName = event.target.value.split(":")[0];
+      var receivingPlayerId = event.target.value.split(":")[1];
+      var givingPlayer = getUserPlayer(game);
+      var receivingPlayer = getPlayerFromUserId(game, receivingPlayerId);
+
+      transferResources(givingPlayer, receivingPlayer, resourceName, 1);
+
+      Games.update(game._id, game);
     },
   });
 }
