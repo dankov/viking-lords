@@ -1052,6 +1052,20 @@ if (Meteor.isClient) {
       return userPlayer.resourcesLeftToScourge > 0;
     },
 
+    currentUserBusy: function() {
+      var game = Template.parentData(0);
+      var currentUserPlayer = getUserPlayer(game);
+      return currentUserPlayer.resourcesLeftToScourge > 0 ||
+        currentUserPlayer.resourcesLeftToCovert > 0 ||
+        currentUserPlayer.valkyring ||
+        currentUserPlayer.smiting ||
+        currentUserPlayer.collectingBounty ||
+        currentUserPlayer.defendingBurn ||
+        currentUserPlayer.raiding ||
+        currentUserPlayer.givingSkald ||
+        currentUserPlayer.usingTradingPost;
+    },
+
     resourceCost: function() {
       var marketplaceItem = this;
       var resourceCost = [];

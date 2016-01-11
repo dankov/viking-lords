@@ -325,8 +325,145 @@
   </div>
   <div class="row">
     <div class="col-lg-3">
-      <h4>All is Peaceful</h4>
-      <p>Nothing requires your attention right now.</p>
+      <h4>Advisor</h4>
+      {{#if currentUserBusy}}
+
+        {{#if currentPlayerGivingSkald}}
+          <h6>Choose who to give the Skald to:</h6>
+          {{#each currentState.players}}
+            {{#if isUser}}{{else}}
+              <button class="give-skald btn btn-default" value="{{user._id}}">{{user.name}}</button>
+            {{/if}}
+          {{/each}}
+        {{/if}}
+
+        {{#if currentPlayerTrading}}
+          <h6>Make a trading post selection</h6>
+          {{#if currentPlayerTradingStep1}}
+            <p>Which resource do you want to trade <b>away</b>?</p>
+            <button class="trade-away btn btn btn-default" value="blue">Blue</button>
+            <button class="trade-away btn btn-default" value="green">Green</button>
+            <button class="trade-away btn btn-default" value="red">Red</button>
+            <button class="trade-away btn btn-default" value="purple">Purple</button>
+          {{else}}
+            <p>Which resource do you want to trade <b>for</b>?</p>
+            <button class="trade-for btn btn-default" value="blue">Blue</button>
+            <button class="trade-for btn btn-default" value="green">Green</button>
+            <button class="trade-for btn btn-default" value="red">Red</button>
+            <button class="trade-for btn btn-default" value="purple">Purple</button>
+          {{/if}}
+        {{/if}}
+
+        {{#if currentUserConvertingResources}}
+          <h6>Convert which resources?</h6>
+          <button class="convert btn btn-default" value="blue">Blue</button>
+          <button class="convert btn btn-default" value="green">Green</button>
+          <button class="convert btn btn-default" value="red">Red</button>
+          <button class="convert btn btn-default" value="purple">Purple</button>
+        {{/if}}
+
+        {{#if currentPlayerRaiding}}
+          <h6>Attack</h6>
+          {{#if currentPlayerDecidingWhoToRaid}}
+            <p>Who do you want to attack?</p>
+            {{#each currentState.players}}
+              {{#if isUser}}
+              {{else}}
+                <button class="choose-who-to-raid btn btn-default" value="{{user._id}}">{{user.name}}</button>
+              {{/if}}
+            {{/each}}
+            <button class="choose-who-to-raid btn btn-default" value="">Do not attack</button>
+          {{/if}}
+          {{#if currentPlayerDecidingHowToRaid}}
+            <p>How do you want to attack?</p>
+            <button class="choose-how-to-raid btn btn-default" value="take">Take stuff</button>
+            <button class="choose-how-to-raid btn btn-default" value="burn">Burn something</button>
+            <button class="choose-how-to-raid btn btn-default" value="both">Take stuff and burn something</button>
+          {{/if}}
+          {{#if currentPlayerWaitingOnDefender}}
+            <p>Waiting for defender to decide whether or not to defend.</p>
+          {{/if}}
+          {{#if currentPlayerDecidingWhatToBurn}}
+            <p>What do you want to burn?</p>
+            <button class="burn-structure btn btn-default" value="tavern">Tavern</button>
+            <button class="burn-structure btn btn-default" value="meadhall">Mead Hall</button>
+            <button class="burn-structure btn btn-default" value="longboat">Longboat</button>
+          {{/if}}
+          {{#if currentUserDecidingWhatToTake}}
+            <p>What do you want to take?</p>
+            <button class="steal-resource btn btn-default" value="blue">Blue</button>
+            <button class="steal-resource btn btn-default" value="green">Green</button>
+            <button class="steal-resource btn btn-default" value="red">Red</button>
+            <button class="steal-resource btn btn-default" value="purple">Purple</button>
+          {{/if}}
+        {{/if}}
+
+        {{#if currentUserUnderAttack}}
+          <h6>Defend</h6>
+          <p>Sacrifice a Viking to defend your village?</p>
+          <button class="defend-attack btn btn-default" value="true">Yes</button>
+          <button class="defend-attack btn btn-default" value="false">No</button>
+        {{/if}}
+
+        {{#if currentUserCollectingBounty}}
+          <h6>Offering - Bounty</h6>
+          <p>Choose a resource to collect</p>
+          <button class="collect-bounty btn btn-default" value="blue">Blue</button>
+          <button class="collect-bounty btn btn-default" value="green">Green</button>
+          <button class="collect-bounty btn btn-default" value="red">Red</button>
+          <button class="collect-bounty btn btn-default" value="purple">Purple</button>
+        {{/if}}
+
+        {{#if currentUserSmiting}}
+          <h6>Offering - Smite</h6>
+          {{#if currentPlayerDecidingWhoToSmite}}
+            <p>Who do you want to smite?</p>
+            {{#each currentState.players}}
+              {{#if isUser}}
+              {{else}}
+                <button class="choose-who-to-smite btn btn-default" value="{{user._id}}">{{user.name}}</button>
+              {{/if}}
+            {{/each}}
+            <button class="choose-who-to-smite btn btn-default" value="">Do not smite</button>
+          {{/if}}
+          {{#if currentPlayerDecidingWhatToSmite}}
+            <p>What do you want to smite?</p>
+            <button class="choose-what-to-smite btn btn-default" value="tavern">Tavern</button>
+            <button class="choose-what-to-smite btn btn-default" value="meadhall">Mead Hall</button>
+            <button class="choose-what-to-smite btn btn-default" value="longboat">Longboat</button>
+          {{/if}}
+        {{/if}}
+
+        {{#if currentUserValkyring}}
+          <h6>Offering - Valkyrie</h6>
+          {{#if currentPlayerDecidingWhoToValkyrie}}
+            <p>Who do you want to valkyrie?</p>
+            {{#each currentState.players}}
+              {{#if isUser}}
+              {{else}}
+                <button class="choose-who-to-valkyrie btn btn-default" value="{{user._id}}">{{user.name}}</button>
+              {{/if}}
+            {{/each}}
+            <button class="choose-who-to-valkyrie btn btn-default" value="">Do not valkyrie</button>
+          {{/if}}
+          {{#if currentPlayerDecidingWhatToValkyrie}}
+            <p>What do you want to valkyrie?</p>
+            <button class="choose-what-to-valkyrie btn btn-default" value="viking">Viking</button>
+            <button class="choose-what-to-valkyrie btn btn-default" value="skald">Skald</button>
+          {{/if}}
+        {{/if}}
+
+        {{#if currentUserBeingScourged}}
+          <h6>Offering - Scourge</h6>
+          <p>Choose a resource to destroy</p>
+          <button class="scourge-resource btn btn-default" value="blue">Blue</button>
+          <button class="scourge-resource btn btn-default" value="green">Green</button>
+          <button class="scourge-resource btn btn-default" value="red">Red</button>
+          <button class="scourge-resource btn btn-default" value="purple">Purple</button>
+        {{/if}}
+      {{else}}
+        <p>Nothing requires your urgent attention.</p>
+      {{/if}}
     </div>
     <div class="col-lg-3">
       <h4>Weregeld</h4>
@@ -345,13 +482,13 @@
       <h4>Decks</h4>
       <h6>Past Offerings</h6>
       <ul>
-        {{#each currentState.playedOmens}}
+        {{#each currentState.playedOfferings}}
           <li>{{this}}</li>
         {{/each}}
       </ul>
       <h6>Past Omens</h6>
       <ul>
-        {{#each currentState.playedOfferings}}
+        {{#each currentState.playedOmens}}
           <li>{{this}}</li>
         {{/each}}
       </ul>
@@ -363,139 +500,6 @@
       {{/if}}
     </div>
   </div>
-
-
-	{{#if currentPlayerGivingSkald}}
-		<h4>Choose who to give the Skald to:</h4>
-		{{#each currentState.players}}
-			{{#if isUser}}{{else}}<button class="give-skald" value="{{user._id}}">{{user.name}}</button>{{/if}}
-		{{/each}}
-	{{/if}}
-
-  {{#if currentPlayerTrading}}
-    <h4>Make a trading post selection</h4>
-    {{#if currentPlayerTradingStep1}}
-      Which resource do you want to trade <b>away</b>?
-      <button class="trade-away" value="blue">Blue</button>
-      <button class="trade-away" value="green">Green</button>
-      <button class="trade-away" value="red">Red</button>
-      <button class="trade-away" value="purple">Purple</button>
-    {{else}}
-      Which resource do you want to trade <b>for</b>?
-      <button class="trade-for" value="blue">Blue</button>
-      <button class="trade-for" value="green">Green</button>
-      <button class="trade-for" value="red">Red</button>
-      <button class="trade-for" value="purple">Purple</button>
-    {{/if}}
-  {{/if}}
-
-  {{#if currentUserConvertingResources}}
-		Convert which resources?
-		<button class="convert" value="blue">Blue</button>
-		<button class="convert" value="green">Green</button>
-		<button class="convert" value="red">Red</button>
-		<button class="convert" value="purple">Purple</button>
-	{{/if}}
-
-	{{#if currentPlayerRaiding}}
-	<h3>Attack</h3>
-		{{#if currentPlayerDecidingWhoToRaid}}
-			Who do you want to attack?
-			{{#each currentState.players}}
-				{{#if isUser}}
-				{{else}}
-					<button class="choose-who-to-raid" value="{{user._id}}">{{user.name}}</button>
-				{{/if}}
-			{{/each}}
-			<button class="choose-who-to-raid" value="">Do not attack</button>
-		{{/if}}
-		{{#if currentPlayerDecidingHowToRaid}}
-			How do you want to attack?
-			<button class="choose-how-to-raid" value="take">Take stuff</button>
-			<button class="choose-how-to-raid" value="burn">Burn something</button>
-			<button class="choose-how-to-raid" value="both">Take stuff and burn something</button>
-		{{/if}}
-		{{#if currentPlayerWaitingOnDefender}}
-			Waiting for defender to decide whether or not to defend.
-		{{/if}}
-		{{#if currentPlayerDecidingWhatToBurn}}
-			What do you want to burn?
-			<button class="burn-structure" value="tavern">Tavern</button>
-			<button class="burn-structure" value="meadhall">Mead Hall</button>
-			<button class="burn-structure" value="longboat">Longboat</button>
-		{{/if}}
-		{{#if currentUserDecidingWhatToTake}}
-			What do you want to take?
-			<button class="steal-resource" value="blue">Blue</button>
-			<button class="steal-resource" value="green">Green</button>
-			<button class="steal-resource" value="red">Red</button>
-			<button class="steal-resource" value="purple">Purple</button>
-		{{/if}}
-	{{/if}}
-
-	{{#if currentUserCollectingBounty}}
-		<h3>Offering - Bounty</h3>
-		Choose a resource to collect
-		<button class="collect-bounty" value="blue">Blue</button>
-		<button class="collect-bounty" value="green">Green</button>
-		<button class="collect-bounty" value="red">Red</button>
-		<button class="collect-bounty" value="purple">Purple</button>
-	{{/if}}
-
-	{{#if currentUserSmiting}}
-		<h3>Offering - Smite</h3>
-		{{#if currentPlayerDecidingWhoToSmite}}
-			Who do you want to smite?
-			{{#each currentState.players}}
-				{{#if isUser}}
-				{{else}}
-					<button class="choose-who-to-smite" value="{{user._id}}">{{user.name}}</button>
-				{{/if}}
-			{{/each}}
-			<button class="choose-who-to-smite" value="">Do not smite</button>
-		{{/if}}
-		{{#if currentPlayerDecidingWhatToSmite}}
-			What do you want to smite?
-			<button class="choose-what-to-smite" value="tavern">Tavern</button>
-			<button class="choose-what-to-smite" value="meadhall">Mead Hall</button>
-			<button class="choose-what-to-smite" value="longboat">Longboat</button>
-		{{/if}}
-	{{/if}}
-
-	{{#if currentUserValkyring}}
-		<h3>Offering - Valkyrie</h3>
-		{{#if currentPlayerDecidingWhoToValkyrie}}
-			Who do you want to valkyrie?
-			{{#each currentState.players}}
-				{{#if isUser}}
-				{{else}}
-					<button class="choose-who-to-valkyrie" value="{{user._id}}">{{user.name}}</button>
-				{{/if}}
-			{{/each}}
-			<button class="choose-who-to-valkyrie" value="">Do not valkyrie</button>
-		{{/if}}
-		{{#if currentPlayerDecidingWhatToValkyrie}}
-			What do you want to valkyrie?
-			<button class="choose-what-to-valkyrie" value="viking">Viking</button>
-			<button class="choose-what-to-valkyrie" value="skald">Skald</button>
-		{{/if}}
-	{{/if}}
-
-	{{#if currentUserBeingScourged}}
-		<h3>Offering - Scourge</h3>
-		Choose a resource to destroy
-		<button class="scourge-resource" value="blue">Blue</button>
-		<button class="scourge-resource" value="green">Green</button>
-		<button class="scourge-resource" value="red">Red</button>
-		<button class="scourge-resource" value="purple">Purple</button>
-	{{/if}}
-
-	{{#if currentUserUnderAttack}}
-	<h3>Defend</h3>
-		Sacrifice a Viking to defend your village?
-		<button class="defend-attack" value="true">Yes</button>
-		<button class="defend-attack" value="false">No</button>
-	{{/if}}
   <br/>
   <br/>
   <br/>
@@ -596,11 +600,11 @@
         <li>Show marketplace costs when picking resources</li>
         <li>Add tips during resource picking about which resource you are making easy/excluding</li>
         <li>Show all stuff for a single player in one place rather than multiple tables</li>
-        <li>Move modal actions to "All Is Peaceful" block</li>
+        <li>Move modal actions prettier</li>
         <li>Add more text to "All Is Peaceful"</li>
       </ul>
     <li>Don't allow actions that can't be taken</li>
-    <li>Make action with decisions modal</li>
+    <li>Make actions with decisions actually modal</li>
     <li>Log actions</li>
     <li>Clean up code</li>
     <li>Give confirmation when server has accepted an action</li>
