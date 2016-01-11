@@ -213,13 +213,13 @@
             <td class="text-center">
               {{structures.tavern}}
               {{#if isUser}}
-                <button class="activate-tavern btn btn-default">Convert 1 Rare ({{structureUses.tavern}} left)</button>
+                <button class="activate-tavern btn btn-default">1 Rare to 1 Geld({{structureUses.tavern}} left)</button>
               {{/if}}
             </td>
             <td class="text-center">
               {{structures.meadhall}}
               {{#if isUser}}
-                <button class="activate-meadhall btn btn-default">Convert 1 Common ({{structureUses.meadhall}} left)</button>
+                <button class="activate-meadhall btn btn-default">1 Common to 1 Geld({{structureUses.meadhall}} left)</button>
               {{/if}}
             </td>
             <td class="text-center">
@@ -262,6 +262,109 @@
     </div>
   </div>
 
+  <div class="row">
+    <div class="col-lg-4">
+      <h4>MarketPlace</h4>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Cost</th>
+            <th></th>
+          </tr>
+        </thead>
+        {{#each marketplace}}
+          <tr>
+            <td>{{name}}</td>
+            <td>{{#each resourceCost}}<img src="{{imagePathForResource}}" title="{{this}}" alt="{{this}}" height="16" width="16" hspace="4">{{/each}}</td>
+            <td>{{#if isUsersTurn2}}<button class="buy-marketplace btn btn-default" value="{{name}}">Buy</button>{{/if}}</td>
+          </tr>
+        {{/each}}
+      </table>
+    </div>
+    <div class="col-lg-4">
+      <h4>Shared Tracks</h4>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Track</th>
+            <th>Slot 1</th>
+            <th>Slot 2</th>
+            <th>Slot 3</th>
+            <th>Slot 4</th>
+          </tr>
+        </thead>
+        {{#each currentState.sharedTracks}}
+          <tr>
+            <td>{{name}}</td>
+            {{#each buySlots}}
+              <td>
+                {{#if bought}}
+                  <span class="fa fa-ban"></span>
+                {{else}}
+                  {{cost}}
+                  {{#if available}}{{#if isUsersTurn3}}
+                    <button class="buy-track btn btn-default" value="{{../name}}">Buy</button>
+                  {{/if}}{{/if}}
+                {{/if}}
+              </td>
+            {{/each}}
+          </tr>
+        {{/each}}
+      </table>
+    </div>
+    <div class="col-lg-4">
+      <h4>Convert</h4>
+      {{#if isUsersTurn}}
+        <ul class="list-unstyled1">
+          <li><button class="convert-to-rare btn btn-default">Convert 2 Common to 1 Rare</button></li>
+          <li><button class="convert-to-geld btn btn-default">Convert 4 Resources to 1 Geld</button></li>
+        </ul>
+      {{/if}}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-3">
+      <h4>All is Peaceful</h4>
+      <p>Nothing requires your attention right now.</p>
+    </div>
+    <div class="col-lg-3">
+      <h4>Weregeld</h4>
+      <ul>
+        {{#each currentUserWeregeld}}
+          <li>
+            {{user.name}}
+            {{#if isUsersTurn2}}
+              <button class="pay-weregeld btn btn-default" value="{{user._id}}">Pay</button>
+            {{/if}}
+          </li>
+        {{/each}}
+      </ul>
+    </div>
+    <div class="col-lg-3">
+      <h4>Decks</h4>
+      <h6>Past Offerings</h6>
+      <ul>
+        {{#each currentState.playedOmens}}
+          <li>{{this}}</li>
+        {{/each}}
+      </ul>
+      <h6>Past Omens</h6>
+      <ul>
+        {{#each currentState.playedOfferings}}
+          <li>{{this}}</li>
+        {{/each}}
+      </ul>
+    </div>
+    <div class="col-lg-3">
+      <h4>End Turn</h4>
+      {{#if isUsersTurn}}
+        <button class="end-turn btn btn-primary">End Turn</button>
+      {{/if}}
+    </div>
+  </div>
+
+
 	{{#if currentPlayerGivingSkald}}
 		<h4>Choose who to give the Skald to:</h4>
 		{{#each currentState.players}}
@@ -269,64 +372,29 @@
 		{{/each}}
 	{{/if}}
 
-	<h2>Actions</h2>
-	<h3>Convert:</h3>
-	{{#if currentUserConvertingResources}}
+  {{#if currentPlayerTrading}}
+    <h4>Make a trading post selection</h4>
+    {{#if currentPlayerTradingStep1}}
+      Which resource do you want to trade <b>away</b>?
+      <button class="trade-away" value="blue">Blue</button>
+      <button class="trade-away" value="green">Green</button>
+      <button class="trade-away" value="red">Red</button>
+      <button class="trade-away" value="purple">Purple</button>
+    {{else}}
+      Which resource do you want to trade <b>for</b>?
+      <button class="trade-for" value="blue">Blue</button>
+      <button class="trade-for" value="green">Green</button>
+      <button class="trade-for" value="red">Red</button>
+      <button class="trade-for" value="purple">Purple</button>
+    {{/if}}
+  {{/if}}
+
+  {{#if currentUserConvertingResources}}
 		Convert which resources?
 		<button class="convert" value="blue">Blue</button>
 		<button class="convert" value="green">Green</button>
 		<button class="convert" value="red">Red</button>
 		<button class="convert" value="purple">Purple</button>
-	{{else}}
-		<td>{{#if isUsersTurn}}<button class="convert-to-rare">Convert 2 Common to 1 Rare</button>{{/if}}</td>
-		<td>{{#if isUsersTurn}}<button class="convert-to-geld">Convert 4 Resources to 1 Geld</button>{{/if}}</td>
-	{{/if}}
-
-	<h3>Shared Tracks</h3>
-	{{#if currentPlayerTrading}}
-		<h4>Make a trading post selection</h4>
-		{{#if currentPlayerTradingStep1}}
-			Which resource do you want to trade <b>away</b>?
-			<button class="trade-away" value="blue">Blue</button>
-			<button class="trade-away" value="green">Green</button>
-			<button class="trade-away" value="red">Red</button>
-			<button class="trade-away" value="purple">Purple</button>
-		{{else}}
-			Which resource do you want to trade <b>for</b>?
-			<button class="trade-for" value="blue">Blue</button>
-			<button class="trade-for" value="green">Green</button>
-			<button class="trade-for" value="red">Red</button>
-			<button class="trade-for" value="purple">Purple</button>
-		{{/if}}
-	{{else}}
-		<table>
-		<tr>
-			<td>Track</td>
-			<td>Cost #1</td>
-			<td>Cost #2</td>
-			<td>Cost #3</td>
-			<td>Cost #4</td>
-		</tr>
-		{{#each currentState.sharedTracks}}
-		<tr>
-			<td>{{name}}</td>
-			{{#each buySlots}}
-				<td>
-					{{#if bought}}
-						<s>{{cost}}</s>
-					{{else}}
-						{{cost}}
-					{{/if}}
-					{{#if available}}
-						{{#if isUsersTurn3}}
-							<button class="buy-track" value="{{../name}}">Buy</button>
-						{{/if}}
-					{{/if}}
-				</td>
-			{{/each}}
-		</tr>
-		{{/each}}
-	</table>
 	{{/if}}
 
 	{{#if currentPlayerRaiding}}
@@ -428,72 +496,60 @@
 		<button class="defend-attack" value="true">Yes</button>
 		<button class="defend-attack" value="false">No</button>
 	{{/if}}
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+	<h4>Cheat</h4>
+	<h5>Gimme</h5>
+	<button class="raid-common btn btn-danger">Commons for Everyone!</button>
+	<button class="raid-rare btn btn-danger">Rares for Everyone!</button>
 
-	<h3>MarketPlace:</h3>
-	<table>
-	<tr>
-		<td>Stucture</td>
-		<td>Cost</td>
-		<td></td>
-	</tr>
-	{{#each marketplace}}
-	<tr>
-		<td>{{name}}</td>
-		<td>{{#each resourceCost}}<img src="{{imagePathForResource}}" title="{{this}}" alt="{{this}}" height="16" width="16">{{/each}}</td>
-		<td>{{#if isUsersTurn2}}<button class="buy-marketplace" value="{{name}}">Buy</button>{{/if}}</td>
-	</tr>
-	{{/each}}
-	</table>
+	<h5>Reset</h5>
+	<button class="reset-raids btn btn-danger">Cancel all raids</button>
+	<button class="reset-offerings btn btn-danger">Cancel all offerings</button>
 
-	<h3>Pay Weregeld:</h3>
-	<ul>
-	{{#if isUsersTurn}}
-		{{#each currentUserWeregeld}}
-			<li><button class="pay-weregeld" value="{{user._id}}">Pay {{user.name}}</button></li>
-		{{/each}}
-	{{/if}}
-	</ul>
-
-  <h2>Decks</h2>
-	<h3>Omens</h3>
+	<h5>Peek</h5>
+	<h6>Omen Deck:</h6>
 	<ol>
-	{{#each currentState.playedOmens}}
-		<li>{{this}}</li>
-	{{/each}}
+    {{#each currentState.omenDeck}}
+      <li>{{this}}</li>
+    {{/each}}
 	</ol>
-	<h3>Offerings</h3>
+	<h6>Offering Deck:</h6>
 	<ol>
-	{{#each currentState.playedOfferings}}
-		<li>{{this}}</li>
-	{{/each}}
-	</ol>
-
-	<h3>End Turn:</h3>
-	{{#if isUsersTurn}}
-		<button class="end-turn">End Turn</button>
-	{{/if}}
-
-	<h2>Cheat</h2>
-	<h3>Gimme:</h3>
-	<button class="raid-common">Commons for Everyone!</button>
-	<button class="raid-rare">Rares for Everyone!</button>
-
-	<h3>Reset:</h3>
-	<button class="reset-raids">Cancel all raids</button>
-	<button class="reset-offerings">Cancel all offerings</button>
-
-	<h3>Peek:</h3>
-	<h4>Omen Deck:</h4>
-	<ol>
-	{{#each currentState.omenDeck}}
-		<li>{{this}}</li>
-	{{/each}}
-	</ol>
-	<h4>Offering Deck:</h4>
-	<ol>
-	{{#each currentState.offeringDeck}}
-		<li>{{this}}</li>
-	{{/each}}
+    {{#each currentState.offeringDeck}}
+      <li>{{this}}</li>
+    {{/each}}
 	</ol>
 </template>
 
@@ -540,7 +596,8 @@
         <li>Show marketplace costs when picking resources</li>
         <li>Add tips during resource picking about which resource you are making easy/excluding</li>
         <li>Show all stuff for a single player in one place rather than multiple tables</li>
-        <li>Boostrapify the game page</li>
+        <li>Move modal actions to "All Is Peaceful" block</li>
+        <li>Add more text to "All Is Peaceful"</li>
       </ul>
     <li>Don't allow actions that can't be taken</li>
     <li>Make action with decisions modal</li>
