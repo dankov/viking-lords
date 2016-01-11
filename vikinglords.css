@@ -1,6 +1,10 @@
 /* CSS declarations go here */
 
 /* This is a hack to replace a bootstrap rule that seems to be misssing */
+
 table.table tr:not(:first-child) {
-  border-top: 1px solid #ddd;
+  /* default version= border-top: 1px solid #DDD; */
+  /* sandstone version= border-top: 1px solid #DFD7CA; */
+  /* paper version= border-top: 1px solid #DDD; */
+  border-top: 1px solid #DDD;
 }
