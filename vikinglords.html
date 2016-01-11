@@ -54,7 +54,7 @@
     <thead>
       <tr>
         <th>Name</th>
-        <th>Status</th> 
+        <th>Status</th>
         <th></th>
       </tr>
     </thead>
@@ -181,7 +181,7 @@
 		<li>{{this}}</li>
 	{{/each}}
 	</ol>
-	
+
 	<h2>Stuff</h2>
 	<h3>Stash:</h3>
 	<table>
@@ -204,7 +204,7 @@
 		<td>{{stash.green}}{{#if canTrade}}<button class="give-resource" value="green:{{user._id}}">Give 1</button>{{/if}}</td>
 		<td>{{stash.red}}{{#if canTrade}}<button class="give-resource" value="red:{{user._id}}">Give 1</button>{{/if}}</td>
 		<td>{{stash.purple}}{{#if canTrade}}<button class="give-resource" value="purple:{{user._id}}">Give 1</button>{{/if}}</td>
-		<td>{{stash.geld}}{{#if canTrade}}<button class="give-resource" value="geld:{{user._id}}">Give 1</button>{{/if}}</td>		
+		<td>{{stash.geld}}{{#if canTrade}}<button class="give-resource" value="geld:{{user._id}}">Give 1</button>{{/if}}</td>
 		<td>{{stash.prestige}}</td>
     <td>{{stash.gods}}</td>
 		<td>{{stash.einherjar}}</td>
@@ -212,7 +212,7 @@
 	</tr>
 	{{/each}}
 	</table>
-	
+
 	<h3>Structures:</h3>
 	<table>
 	<tr>
@@ -230,7 +230,7 @@
 	</tr>
 	{{/each}}
 	</table>
-	
+
 	{{#if currentPlayerGivingSkald}}
 		<h4>Choose who to give the Skald to:</h4>
 		{{#each currentState.players}}
@@ -253,7 +253,7 @@
 		{{/each}}
 		</table>
 	{{/if}}
-	
+
 	<h3>Purchased:</h3>
 	<table>
 	<tr>
@@ -271,7 +271,7 @@
 	</tr>
 	{{/each}}
 	</table>
-	
+
 	<h2>Actions</h2>
 	<h3>Convert:</h3>
 	{{#if currentUserConvertingResources}}
@@ -284,7 +284,7 @@
 		<td>{{#if isUsersTurn}}<button class="convert-to-rare">Convert 2 Common to 1 Rare</button>{{/if}}</td>
 		<td>{{#if isUsersTurn}}<button class="convert-to-geld">Convert 4 Resources to 1 Geld</button>{{/if}}</td>
 	{{/if}}
-	
+
 	<h3>Shared Tracks</h3>
 	{{#if currentPlayerTrading}}
 		<h4>Make a trading post selection</h4>
@@ -309,7 +309,7 @@
 			<td>Cost #2</td>
 			<td>Cost #3</td>
 			<td>Cost #4</td>
-		</tr>	
+		</tr>
 		{{#each currentState.sharedTracks}}
 		<tr>
 			<td>{{name}}</td>
@@ -331,7 +331,7 @@
 		{{/each}}
 	</table>
 	{{/if}}
-	
+
 	{{#if currentPlayerRaiding}}
 	<h3>Attack</h3>
 		{{#if currentPlayerDecidingWhoToRaid}}
@@ -340,7 +340,7 @@
 				{{#if isUser}}
 				{{else}}
 					<button class="choose-who-to-raid" value="{{user._id}}">{{user.name}}</button>
-				{{/if}}				
+				{{/if}}
 			{{/each}}
 			<button class="choose-who-to-raid" value="">Do not attack</button>
 		{{/if}}
@@ -367,7 +367,7 @@
 			<button class="steal-resource" value="purple">Purple</button>
 		{{/if}}
 	{{/if}}
-	
+
 	{{#if currentUserCollectingBounty}}
 		<h3>Offering - Bounty</h3>
 		Choose a resource to collect
@@ -376,7 +376,7 @@
 		<button class="collect-bounty" value="red">Red</button>
 		<button class="collect-bounty" value="purple">Purple</button>
 	{{/if}}
-	
+
 	{{#if currentUserSmiting}}
 		<h3>Offering - Smite</h3>
 		{{#if currentPlayerDecidingWhoToSmite}}
@@ -385,7 +385,7 @@
 				{{#if isUser}}
 				{{else}}
 					<button class="choose-who-to-smite" value="{{user._id}}">{{user.name}}</button>
-				{{/if}}				
+				{{/if}}
 			{{/each}}
 			<button class="choose-who-to-smite" value="">Do not smite</button>
 		{{/if}}
@@ -396,7 +396,7 @@
 			<button class="choose-what-to-smite" value="longboat">Longboat</button>
 		{{/if}}
 	{{/if}}
-	
+
 	{{#if currentUserValkyring}}
 		<h3>Offering - Valkyrie</h3>
 		{{#if currentPlayerDecidingWhoToValkyrie}}
@@ -405,7 +405,7 @@
 				{{#if isUser}}
 				{{else}}
 					<button class="choose-who-to-valkyrie" value="{{user._id}}">{{user.name}}</button>
-				{{/if}}				
+				{{/if}}
 			{{/each}}
 			<button class="choose-who-to-valkyrie" value="">Do not valkyrie</button>
 		{{/if}}
@@ -415,7 +415,7 @@
 			<button class="choose-what-to-valkyrie" value="skald">Skald</button>
 		{{/if}}
 	{{/if}}
-	
+
 	{{#if currentUserBeingScourged}}
 		<h3>Offering - Scourge</h3>
 		Choose a resource to destroy
@@ -424,14 +424,14 @@
 		<button class="scourge-resource" value="red">Red</button>
 		<button class="scourge-resource" value="purple">Purple</button>
 	{{/if}}
-	
+
 	{{#if currentUserUnderAttack}}
 	<h3>Defend</h3>
 		Sacrifice a Viking to defend your village?
 		<button class="defend-attack" value="true">Yes</button>
 		<button class="defend-attack" value="false">No</button>
 	{{/if}}
-	
+
 	<h3>MarketPlace:</h3>
 	<table>
 	<tr>
@@ -447,7 +447,7 @@
 	</tr>
 	{{/each}}
 	</table>
-	
+
 	<h3>Pay Weregeld:</h3>
 	<ul>
 	{{#if isUsersTurn}}
@@ -456,21 +456,21 @@
 		{{/each}}
 	{{/if}}
 	</ul>
-	
+
 	<h3>End Turn:</h3>
 	{{#if isUsersTurn}}
 		<button class="end-turn">End Turn</button>
 	{{/if}}
-	
+
 	<h2>Cheat</h2>
 	<h3>Gimme:</h3>
 	<button class="raid-common">Commons for Everyone!</button>
 	<button class="raid-rare">Rares for Everyone!</button>
-	
+
 	<h3>Reset:</h3>
 	<button class="reset-raids">Cancel all raids</button>
 	<button class="reset-offerings">Cancel all offerings</button>
-	
+
 	<h3>Peek:</h3>
 	<h4>Omen Deck:</h4>
 	<ol>
@@ -503,6 +503,6 @@
     <li>Clean up code</li>
     <li>Give confirmation when server has accepted an action</li>
     <li>Make sure all actions are updated in the db atomically</li>
-    
+
   </ul>
 </template>
