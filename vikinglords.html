@@ -108,14 +108,14 @@
 		<h2>Common Resources</h2>
 		<ul>
 		{{#each currentState.availableCommonResources}}
-			<li>{{this}}{{#if isUsersTurn}}<button class="pick-common">Pick</button>{{/if}}</li>
+			<li><img src="{{imagePathForResource}}" title="{{this}}" alt="{{this}}" height="16" width="16"> {{#if isUsersTurn}}<button class="pick-common">Pick {{this}}</button>{{/if}}</li>
 		{{/each}}
 		</ul>
 	{{else}}
 		<h2>Rare Resources</h2>
 		<ul>
 		{{#each currentState.availableRareResources}}
-			<li>{{this}}{{#if isUsersTurn}}<button class="pick-rare">Pick</button>{{/if}}</li>
+			<li><img src="{{imagePathForResource}}" title="{{this}}" alt="{{this}}" height="16" width="16">{{#if isUsersTurn}}<button class="pick-rare">Pick {{this}}</button>{{/if}}</li>
 		{{/each}}
 		</ul>
 	{{/if}}
@@ -141,14 +141,14 @@
 	<h3>Stash:</h3>
 	<table>
 	<tr>
-		<td>Name</td>
-		<td>Blue</td>
-		<td>Green</td>
-		<td>Red</td>
-		<td>Purple</td>
-		<td>Geld</td>
-		<td>Gods</td>
+		<td></td>
+		<td><img src="/images/cube-blue.png" title="Blue" alt="Blue" height="16" width="16"></td>
+		<td><img src="/images/cube-green.png" title="Green" alt="Green" height="16" width="16"></td>
+		<td><img src="/images/cube-red.png" title="Red" alt="Red" height="16" width="16"></td>
+		<td><img src="/images/cube-purple.png" title="Purple" alt="Purple" height="16" width="16"></td>
+		<td><img src="/images/geld.png" title="Geld" alt="Geld" height="16" width="16"></td>
 		<td>Prestige</td>
+    <td>Gods</td>
 		<td>Einherjar</td>
 		<td>Weregeld</td>
 	</tr>
@@ -159,9 +159,9 @@
 		<td>{{stash.green}}{{#if canTrade}}<button class="give-resource" value="green:{{user._id}}">Give 1</button>{{/if}}</td>
 		<td>{{stash.red}}{{#if canTrade}}<button class="give-resource" value="red:{{user._id}}">Give 1</button>{{/if}}</td>
 		<td>{{stash.purple}}{{#if canTrade}}<button class="give-resource" value="purple:{{user._id}}">Give 1</button>{{/if}}</td>
-		<td>{{stash.geld}}{{#if canTrade}}<button class="give-resource" value="geld:{{user._id}}">Give 1</button>{{/if}}</td>
-		<td>{{stash.gods}}</td>
+		<td>{{stash.geld}}{{#if canTrade}}<button class="give-resource" value="geld:{{user._id}}">Give 1</button>{{/if}}</td>		
 		<td>{{stash.prestige}}</td>
+    <td>{{stash.gods}}</td>
 		<td>{{stash.einherjar}}</td>
 		<td>{{stash.weregeld}}</td>
 	</tr>
@@ -391,19 +391,13 @@
 	<table>
 	<tr>
 		<td>Stucture</td>
-		<td>Blue</td>
-		<td>Green</td>
-		<td>Red</td>
-		<td>Purple</td>
+		<td>Cost</td>
 		<td></td>
 	</tr>
 	{{#each marketplace}}
 	<tr>
 		<td>{{name}}</td>
-		<td>{{blue}}</td>
-		<td>{{green}}</td>
-		<td>{{red}}</td>
-		<td>{{purple}}</td>
+		<td>{{#each resourceCost}}<img src="{{imagePathForResource}}" title="{{this}}" alt="{{this}}" height="16" width="16">{{/each}}</td>
 		<td>{{#if isUsersTurn2}}<button class="buy-marketplace" value="{{name}}">Buy</button>{{/if}}</td>
 	</tr>
 	{{/each}}

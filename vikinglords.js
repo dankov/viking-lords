@@ -247,6 +247,23 @@ if (Meteor.isClient) {
   AmplifiedSession.setDefault(USER, null);
 
   //////////////////////////////////////////////////////////////////////////////
+  // Global Teamplate Helpers
+  //////////////////////////////////////////////////////////////////////////////
+  Template.registerHelper('imagePathForResource', function() {
+     var resource = this.toString();
+      switch (resource) {
+        case BLUE:
+          return "/images/cube-blue.png";
+        case GREEN:
+          return "/images/cube-green.png";
+        case RED:
+          return "/images/cube-red.png";
+        case PURPLE:
+          return "/images/cube-purple.png";
+      }
+  });
+
+  //////////////////////////////////////////////////////////////////////////////
   // Template Code
   //////////////////////////////////////////////////////////////////////////////
   Template.lobby.helpers({
@@ -1023,6 +1040,26 @@ if (Meteor.isClient) {
         }
       }
       return userPlayer.resourcesLeftToScourge > 0;
+    },
+
+    resourceCost: function() {
+      var marketplaceItem = this;
+      var resourceCost = [];
+      var i;
+      for(i = 0; i < marketplaceItem[BLUE]; i++) {
+        resourceCost.push(BLUE);
+      }
+      for(i = 0; i < marketplaceItem[GREEN]; i++) {
+        resourceCost.push(GREEN);
+      }
+      for(i = 0; i < marketplaceItem[RED]; i++) {
+        resourceCost.push(RED);
+      }
+      for(i = 0; i < marketplaceItem[PURPLE]; i++) {
+        resourceCost.push(PURPLE);
+      }
+
+      return resourceCost;
     }
   });
 
