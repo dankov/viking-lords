@@ -238,6 +238,98 @@ function beginPlayStep(game) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Commands
+////////////////////////////////////////////////////////////////////////////////
+function executeCommand(game, command) {
+  game.commands.push(command);
+  commands[command.name].execute(game, command.data);
+  Games.update(game._id, game);
+}
+
+function undoCommand(game, command) {
+  var commandIndex = game.commands.indexOf(command);
+  game.commands.splice(commandIndex, 1);
+  commands[command.name].undo(game, command.data);
+  Games.update(game._id, game);
+}
+
+var COMMAND_BUY_GOOD = "buyGood";
+
+var commands = {};
+commands[COMMAND_BUY_GOOD] = {
+  execute: function (game, data) {
+    var player = getPlayerFromUserId(game, data.playerUserId);
+    var good = data.good;
+
+    // Pay for good
+    player.stash.blue = player.stash.blue - good.blue;
+    player.stash.green = player.stash.green - good.green;
+    player.stash.red = player.stash.red - good.red;
+    player.stash.purple = player.stash.purple - good.purple;
+
+    // Destroy any prerequisites
+    for (var i = 0; i < good.prereqs.length; i++) {
+      player.structures[good.prereqs[i]] =
+        player.structures[good.prereqs[i]] - 1;
+    }
+
+    // Get good
+    switch (good.type) {
+      case STRUCTURE:
+        player.purchased[good.name] = player.purchased[good.name] + 1;
+        break;
+      case CLANSMAN:
+        player.clansmen[good.name] = player.clansmen[good.name] + 1;
+        break;
+      case ACTION:
+        alert("not yet implemented");
+        break;
+    }
+  },
+  undo: function (game, data) {
+    var player = getPlayerFromUserId(game, data.playerUserId);
+    var good = data.good;
+
+    // Get refunded for good
+    player.stash.blue = player.stash.blue + good.blue;
+    player.stash.green = player.stash.green + good.green;
+    player.stash.red = player.stash.red + good.red;
+    player.stash.purple = player.stash.purple + good.purple;
+
+    // Replace any prerequisites
+    for (var i = 0; i < good.prereqs.length; i++) {
+      player.structures[good.prereqs[i]] =
+        player.structures[good.prereqs[i]] + 1;
+    }
+
+    // Lose good
+    switch (good.type) {
+      case STRUCTURE:
+        player.purchased[good.name] = player.purchased[good.name] - 1;
+        break;
+      case CLANSMAN:
+        player.clansmen[good.name] = player.clansmen[good.name] - 1;
+        break;
+      case ACTION:
+        alert("not yet implemented");
+        break;
+    }
+  }
+};
+
+function makeBuyGoodCommand(player, good) {
+  var message = player.user.name + " bought a " + good.name;
+  return {
+    message: message,
+    data: {
+      playerUserId: player.user._id,
+      good: good
+    },
+    name: COMMAND_BUY_GOOD
+  };
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // Client side only code
 ////////////////////////////////////////////////////////////////////////////////
 if (Meteor.isClient) {
@@ -385,6 +477,7 @@ if (Meteor.isClient) {
         name: gameName,
         players: [AmplifiedSession.get(USER)],
         status: "open",
+        commands: [],
         marketplace: [{
           name: TAVERN,
           blue: 1,
@@ -1084,6 +1177,17 @@ if (Meteor.isClient) {
       }
 
       return resourceCost;
+    },
+
+    latestCommands: function(numCommands) {
+      var game = Template.parentData(0);
+      numCommands = Math.min(numCommands, game.commands.length);
+      if(numCommands === 0)
+      {
+        return [];
+      } else {
+        return game.commands.slice(-1 * numCommands).reverse();
+      }
     }
   });
 
@@ -1415,58 +1519,61 @@ if (Meteor.isClient) {
 
     "click button.buy-marketplace": function(event) {
       var game = Template.parentData(0);
-      var gameId = game._id;
-      var currentPlayerIndex = game.currentState.currentPlayerIndex;
-      var itemName = event.target.value;
-      var item;
+      var currentPlayer = getCurrentPlayer(game);
+      var goodName = event.target.value;
+      var good;
 
       for (var i = 0; i < game.marketplace.length; i++) {
-        if (game.marketplace[i].name === itemName) {
-          item = game.marketplace[i];
+        if (game.marketplace[i].name === goodName) {
+          good = game.marketplace[i];
           break;
         }
       }
-      var players = game.currentState.players;
-      var player = players[currentPlayerIndex];
 
-      for (i = 0; i < item.prereqs.length; i++) {
-        player.structures[item.prereqs[i]] = player.structures[item.prereqs[
-          i]] - 1;
-      }
-
-      player.stash.blue = player.stash.blue - item.blue;
-      player.stash.green = player.stash.green - item.green;
-      player.stash.red = player.stash.red - item.red;
-      player.stash.purple = player.stash.purple - item.purple;
-      Games.update(gameId, {
-        $set: {
-          "currentState.players": players
-        }
-      });
-
-      switch (item.type) {
+      switch (good.type) {
         case STRUCTURE:
-          player.purchased[item.name] = player.purchased[item.name] + 1;
-          break;
         case CLANSMAN:
-          player.clansmen[item.name] = player.clansmen[item.name] + 1;
+          var buyGoodCommand = makeBuyGoodCommand(currentPlayer, good);
+          executeCommand(game, buyGoodCommand);
           break;
         case ACTION:
-          switch (item.name) {
+          var players = game.currentState.players;
+
+          for (i = 0; i < good.prereqs.length; i++) {
+            currentPlayer.structures[good.prereqs[i]] =
+              currentPlayer.structures[good.prereqs[i]] - 1;
+          }
+
+          currentPlayer.stash.blue = currentPlayer.stash.blue - good.blue;
+          currentPlayer.stash.green = currentPlayer.stash.green - good.green;
+          currentPlayer.stash.red = currentPlayer.stash.red - good.red;
+          currentPlayer.stash.purple = currentPlayer.stash.purple - good.purple;
+          Games.update(game._id, {
+            $set: {
+              "currentState.players": players
+            }
+          });
+
+          switch (good.name) {
             case ATTACK:
-              player.raiding = true;
-              player.decidingWhoToRaid = true;
+              currentPlayer.raiding = true;
+              currentPlayer.decidingWhoToRaid = true;
+              Games.update(game._id, {
+                $set: {
+                  "currentState.players": players
+                }
+              });
               break;
             case OFFERING:
               var playedOffering = game.currentState.offeringDeck.splice(
                 0, 1).toString();
               game.currentState.playedOfferings.push(playedOffering);
-              Games.update(gameId, {
+              Games.update(game._id, {
                 $set: {
                   "currentState.offeringDeck": game.currentState.offeringDeck
                 }
               });
-              Games.update(gameId, {
+              Games.update(game._id, {
                 $set: {
                   "currentState.playedOfferings":
                     game.currentState.playedOfferings
@@ -1474,17 +1581,17 @@ if (Meteor.isClient) {
               });
               switch (playedOffering) {
                 case SMITE:
-                  player.smiting = true;
-                  player.decidingWhoToSmite = true;
-                  Games.update(gameId, {
+                  currentPlayer.smiting = true;
+                  currentPlayer.decidingWhoToSmite = true;
+                  Games.update(game._id, {
                     $set: {
                       "currentState.players": players
                     }
                   });
                   break;
                 case BOUNTY:
-                  player.collectingBounty = true;
-                  Games.update(gameId, {
+                  currentPlayer.collectingBounty = true;
+                  Games.update(game._id, {
                     $set: {
                       "currentState.players": players
                     }
@@ -1492,7 +1599,7 @@ if (Meteor.isClient) {
                   break;
                 case SCOURGE:
                   for (i = 0; i < players.length; i++) {
-                    if (players[i].user._id !== player.user._id) {
+                    if (players[i].user._id !== currentPlayer.user._id) {
                       var geldToScourge =
                         Math.floor(players[i].stash[GELD] / 2);
                       var totalResources = players[i].stash[BLUE] +
@@ -1506,7 +1613,7 @@ if (Meteor.isClient) {
                         resourcesToScourge;
                     }
                   }
-                  Games.update(gameId, {
+                  Games.update(game._id, {
                     $set: {
                       "currentState.players": players
                     }
@@ -1533,14 +1640,15 @@ if (Meteor.isClient) {
                       break;
                     }
                   }
-                  Games.update(gameId, {
+                  Games.update(game._id, {
                     $set: {
                       "currentState.sharedTracks": sharedTracks
                     }
                   });
 
-                  player.stash[PRESTIGE] = player.stash[PRESTIGE] + 1;
-                  Games.update(gameId, {
+                  currentPlayer.stash[PRESTIGE] =
+                    currentPlayer.stash[PRESTIGE] + 1;
+                  Games.update(game._id, {
                     $set: {
                       "currentState.players": players
                     }
@@ -1549,25 +1657,25 @@ if (Meteor.isClient) {
                 case FORTUNE:
                   var geldEarned = 2;
                   for (i = 0; i < players.length; i++) {
-                    if (players[i].user._id !== player.user._id) {
+                    if (players[i].user._id !== currentPlayer.user._id) {
                       geldEarned = geldEarned + players[i].structures[TAVERN];
                       geldEarned =
                         geldEarned + players[i].structures[MEAD_HALL];
                     }
                   }
-                  player.stash[GELD] = player.stash[GELD] +
+                  currentPlayer.stash[GELD] = currentPlayer.stash[GELD] +
                     geldEarned;
-                  Games.update(gameId, {
+                  Games.update(game._id, {
                     $set: {
                       "currentState.players": players
                     }
                   });
                   break;
                 case VALKYRIE:
-                  player.valkyring = true;
-                  player.decidingWhoToValkyrie = true;
-                  player.stash[GODS] = player.stash[GODS] + 1;
-                  Games.update(gameId, {
+                  currentPlayer.valkyring = true;
+                  currentPlayer.decidingWhoToValkyrie = true;
+                  currentPlayer.stash[GODS] = currentPlayer.stash[GODS] + 1;
+                  Games.update(game._id, {
                     $set: {
                       "currentState.players": players
                     }
@@ -1578,11 +1686,6 @@ if (Meteor.isClient) {
           }
           break;
       }
-      Games.update(gameId, {
-        $set: {
-          "currentState.players": players
-        }
-      });
     },
 
     "click button.trade-away": function(event) {
@@ -2159,6 +2262,14 @@ if (Meteor.isClient) {
         }
       });
     },
+
+    "click button.undo-command": function(event) {
+      var game = Template.parentData(0);
+      var commandIndex = event.target.value;
+      var command = game.commands[commandIndex];
+
+      undoCommand(game, command);
+    }
   });
 
   Template.stash.helpers({

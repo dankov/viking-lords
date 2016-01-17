@@ -463,6 +463,11 @@
         {{/if}}
       {{else}}
         <p>Nothing requires your urgent attention.</p>
+        <ul>
+        {{#each latestCommands 10}}
+          <li>{{this.message}}</li>
+        {{/each}}
+        </ul>
       {{/if}}
     </div>
     <div class="col-lg-3">
@@ -533,7 +538,13 @@
   <br/>
   <br/>
   <br/>
-	<h4>Cheat</h4>
+  <h4>Cheat</h4>
+  <h5>Undo</h5>
+  <ul>
+  {{#each commands}}
+    <li>{{this.message}}<button class="undo-command btn btn-danger" value="{{@index}}">Undo</button></li>
+  {{/each}}
+  </ul>
 	<h5>Gimme</h5>
 	<button class="raid-common btn btn-danger">Commons for Everyone!</button>
 	<button class="raid-rare btn btn-danger">Rares for Everyone!</button>
