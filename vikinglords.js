@@ -164,15 +164,15 @@ function advanceTurn(game, backwards) {
 
 // Adds (or subtracts if negative) a given number of a given type of resource
 // from the given player. This does not return anything.
-function giveResources(player, resource, numberOfResources){
-  player.stash[resource] = player.stash[resource] + numberOfResources;
+function giveResources(player, resource, amount){
+  player.stash[resource] = player.stash[resource] + amount;
 }
 
 // Transfers a given number of a given type of resource from one player to
 // another player. This does not return anything.
-function transferResources(fromPlayer, toPlayer, resource, numberOfResources){
-  giveResources(fromPlayer, resource, -1 * numberOfResources);
-  giveResources(toPlayer, resource, numberOfResources);
+function transferResources(fromPlayer, toPlayer, resource, amount){
+  giveResources(fromPlayer, resource, -1 * amount);
+  giveResources(toPlayer, resource, amount);
 }
 
 // Draw an omen card off the top of the deck and perform its effect. This
@@ -253,7 +253,8 @@ function undoCommand(game, command) {
   Games.update(game._id, game);
 }
 
-var COMMAND_BUY_GOOD = "buyGood";
+var COMMAND_BUY_GOOD = "buyGood",
+  COMMAND_GIVE_RESOURCES = "giveResources";
 
 var commands = {};
 commands[COMMAND_BUY_GOOD] = {
@@ -316,6 +317,35 @@ commands[COMMAND_BUY_GOOD] = {
     }
   }
 };
+commands[COMMAND_GIVE_RESOURCES] = {
+  execute: function (game, data) {
+    var fromPlayer = getPlayerFromUserId(game, data.fromPlayerUserId);
+    var toPlayer = getPlayerFromUserId(game, data.toPlayerUserId);
+    var resourceBundle = data.resourceBundle;
+
+    // Transfer all resources in the resource bundle from one player from the
+    // "fromPlayer" to the "toPlayer"
+    for (var i = 0; i < resourceBundle.length; i++) {
+      var resource = resourceBundle[i].resource;
+      var amount = resourceBundle[i].amount;
+      transferResources(fromPlayer, toPlayer, resource, amount);
+    }
+  },
+  undo: function (game, data) {
+    var fromPlayer = getPlayerFromUserId(game, data.fromPlayerUserId);
+    var toPlayer = getPlayerFromUserId(game, data.toPlayerUserId);
+    var resourceBundle = data.resourceBundle;
+
+    // Transfer all resources in the resource bundle from one player from the
+    // "toPlayer" to the "fromPlayer". The parameter names here are the exact
+    // opposite of the transferResources signature.
+    for (var i = 0; i < resourceBundle.length; i++) {
+      var resource = resourceBundle[i].resource;
+      var amount = resourceBundle[i].amount;
+      transferResources(toPlayer, fromPlayer, resource, amount);
+    }
+  }
+};
 
 function makeBuyGoodCommand(player, good) {
   var message = player.user.name + " bought a " + good.name;
@@ -326,6 +356,43 @@ function makeBuyGoodCommand(player, good) {
       good: good
     },
     name: COMMAND_BUY_GOOD
+  };
+}
+
+function makeGiveResourcesCommand(fromPlayer, toPlayer, resourceBundle) {
+  var resourceBundleString = "";
+  for(var i = 0; i < resourceBundle.length; i++) {
+    var resource = resourceBundle[i].resource;
+    var amount = resourceBundle[i].amount;
+    if(i === 0){
+      resourceBundleString = resourceBundleString + amount + " " + resource;
+    } else if (i === resourceBundle.length - 1) {
+      if(i === 1){
+        resourceBundleString =
+          resourceBundleString + " and " + amount + " " + resource;
+      } else {
+        resourceBundleString =
+          resourceBundleString + ", and " + amount + " " + resource;
+      }
+    } else {
+      resourceBundleString =
+        resourceBundleString + ", " + amount + " " + resource;
+    }
+  }
+  var message =
+    fromPlayer.user.name +
+    " gave " +
+    resourceBundleString +
+    " to " +
+    toPlayer.user.name;
+  return {
+    message: message,
+    data: {
+      fromPlayerUserId: fromPlayer.user._id,
+      toPlayerUserId: toPlayer.user._id,
+      resourceBundle: resourceBundle
+    },
+    name: COMMAND_GIVE_RESOURCES
   };
 }
 
@@ -2307,12 +2374,13 @@ if (Meteor.isClient) {
       var game = Template.parentData(0);
       var resourceName = event.target.value.split(":")[0];
       var receivingPlayerId = event.target.value.split(":")[1];
-      var givingPlayer = getUserPlayer(game);
-      var receivingPlayer = getPlayerFromUserId(game, receivingPlayerId);
+      var fromPlayer = getUserPlayer(game);
+      var toPlayer = getPlayerFromUserId(game, receivingPlayerId);
+      var resourceBundle = [ {resource: resourceName, amount: 1} ];
 
-      transferResources(givingPlayer, receivingPlayer, resourceName, 1);
-
-      Games.update(game._id, game);
+      var giveResourcesCommand =
+        makeGiveResourcesCommand(fromPlayer, toPlayer, resourceBundle);
+      executeCommand(game, giveResourcesCommand);
     },
   });
 }
