@@ -486,7 +486,9 @@
       <h4>Convert</h4>
       {{#if isUsersTurn}}
         <ul class="list-unstyled1">
-          <li><button class="convert-to-rare btn btn-default">Convert 2 Common to 1 Rare</button></li>
+          {{#if canConvertCommonToRare}}
+            <li><button class="convert-to-rare btn btn-default">Convert 2 Common to 1 Rare</button></li>
+          {{/if}}
           <li><button class="convert-to-geld btn btn-default">Convert 4 Resources to 1 Geld</button></li>
         </ul>
       {{/if}}

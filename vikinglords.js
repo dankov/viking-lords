@@ -1275,6 +1275,14 @@ if (Meteor.isClient) {
       } else {
         return game.commands.slice(-1 * numCommands).reverse();
       }
+    },
+
+    canConvertCommonToRare: function() {
+      var game = Template.parentData(0);
+      var currentUserPlayer = getUserPlayer(game);
+
+      var currentUserPlayerCommon = currentUserPlayer.resourcePicks.common;
+      return currentUserPlayer.stash[currentUserPlayerCommon] >= 2;
     }
   });
 
