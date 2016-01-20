@@ -2174,7 +2174,7 @@ if (Meteor.isClient) {
         }
       }
 
-      var cost = player.stash[PRESTIGE];
+      var cost = player.stash[PRESTIGE] - payee.stash[PRESTIGE];
       if (cost < 1) {
         cost = 1;
       }
