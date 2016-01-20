@@ -263,68 +263,7 @@
   </div>
 
   <div class="row">
-    <div class="col-lg-4">
-      <h4>MarketPlace</h4>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Item</th>
-            <th>Cost</th>
-            <th></th>
-          </tr>
-        </thead>
-        {{#each marketplace}}
-          <tr>
-            <td>{{name}}</td>
-            <td>{{#each resourceCost}}<img src="{{imagePathForResource}}" title="{{this}}" alt="{{this}}" height="16" width="16" hspace="4">{{/each}}</td>
-            <td>{{#if isUsersTurn2}}<button class="buy-marketplace btn btn-default" value="{{name}}">Buy</button>{{/if}}</td>
-          </tr>
-        {{/each}}
-      </table>
-    </div>
-    <div class="col-lg-4">
-      <h4>Shared Tracks</h4>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Track</th>
-            <th>Slot 1</th>
-            <th>Slot 2</th>
-            <th>Slot 3</th>
-            <th>Slot 4</th>
-          </tr>
-        </thead>
-        {{#each currentState.sharedTracks}}
-          <tr>
-            <td>{{name}}</td>
-            {{#each buySlots}}
-              <td>
-                {{#if bought}}
-                  <span class="fa fa-ban"></span>
-                {{else}}
-                  {{cost}}
-                  {{#if available}}{{#if isUsersTurn3}}
-                    <button class="buy-track btn btn-default" value="{{../name}}">Buy</button>
-                  {{/if}}{{/if}}
-                {{/if}}
-              </td>
-            {{/each}}
-          </tr>
-        {{/each}}
-      </table>
-    </div>
-    <div class="col-lg-4">
-      <h4>Convert</h4>
-      {{#if isUsersTurn}}
-        <ul class="list-unstyled1">
-          <li><button class="convert-to-rare btn btn-default">Convert 2 Common to 1 Rare</button></li>
-          <li><button class="convert-to-geld btn btn-default">Convert 4 Resources to 1 Geld</button></li>
-        </ul>
-      {{/if}}
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-lg-3">
+  <div class="col-lg-4">
       <h4>Advisor</h4>
       {{#if currentUserBusy}}
 
@@ -470,6 +409,67 @@
         </ul>
       {{/if}}
     </div>
+    <div class="col-lg-4">
+      <h4>MarketPlace</h4>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Cost</th>
+            <th></th>
+          </tr>
+        </thead>
+        {{#each marketplace}}
+          <tr>
+            <td>{{name}}</td>
+            <td>{{#each resourceCost}}<img src="{{imagePathForResource}}" title="{{this}}" alt="{{this}}" height="16" width="16" hspace="4">{{/each}}</td>
+            <td>{{#if isUsersTurn2}}<button class="buy-marketplace btn btn-default" value="{{name}}">Buy</button>{{/if}}</td>
+          </tr>
+        {{/each}}
+      </table>
+    </div>
+    <div class="col-lg-4">
+      <h4>Shared Tracks</h4>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Track</th>
+            <th>Slot 1</th>
+            <th>Slot 2</th>
+            <th>Slot 3</th>
+            <th>Slot 4</th>
+          </tr>
+        </thead>
+        {{#each currentState.sharedTracks}}
+          <tr>
+            <td>{{name}}</td>
+            {{#each buySlots}}
+              <td>
+                {{#if bought}}
+                  <span class="fa fa-ban"></span>
+                {{else}}
+                  {{cost}}
+                  {{#if available}}{{#if isUsersTurn3}}
+                    <button class="buy-track btn btn-default" value="{{../name}}">Buy</button>
+                  {{/if}}{{/if}}
+                {{/if}}
+              </td>
+            {{/each}}
+          </tr>
+        {{/each}}
+      </table>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-3">
+      <h4>Convert</h4>
+      {{#if isUsersTurn}}
+        <ul class="list-unstyled1">
+          <li><button class="convert-to-rare btn btn-default">Convert 2 Common to 1 Rare</button></li>
+          <li><button class="convert-to-geld btn btn-default">Convert 4 Resources to 1 Geld</button></li>
+        </ul>
+      {{/if}}
+    </div>
     <div class="col-lg-3">
       <h4>Weregeld</h4>
       <ul>
@@ -501,7 +501,11 @@
     <div class="col-lg-3">
       <h4>End Turn</h4>
       {{#if isUsersTurn}}
-        <button class="end-turn btn btn-primary">End Turn</button>
+        {{#if currentUserBusy}}
+          <p>You can't end your turn yet, check with your advisor!</p>
+        {{else}}
+          <button class="end-turn btn btn-primary">End Turn</button>
+        {{/if}}
       {{/if}}
     </div>
   </div>
