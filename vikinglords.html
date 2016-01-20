@@ -163,7 +163,7 @@
     {{/if}}
     {{#if inSetupStep}}
       <div class="row">
-        <div class="col-lg-6">
+        <div class="col-lg-10">
           {{> setupStep}}
         </div>
       </div>
@@ -175,19 +175,40 @@
 </template>
 
 <template name="setupStep">
-  <h4>Choose Resources</h4>
-  <h6>Common Resources</h6>
-  <ul class="list-inline">
-  {{#each currentState.availableCommonResources}}
-    <li><img src="{{imagePathForResource}}" title="{{this}}" alt="{{this}}" height="16" width="16"> {{#if needToPickCommon}}{{#if isUsersTurn}}<button class="pick-common btn btn-default">Select</button>{{/if}}{{/if}}</li>
-  {{/each}}
-  </ul>
-  <h6>Rare Resources</h6>
-  <ul class="list-inline">
-  {{#each currentState.availableRareResources}}
-    <li><img src="{{imagePathForResource}}" title="{{this}}" alt="{{this}}" height="16" width="16">{{#if needToPickCommon}}{{else}}{{#if isUsersTurn}}<button class="pick-rare btn btn-default">Select</button>{{/if}}{{/if}}</li>
-  {{/each}}
-  </ul>
+  <div class="row">
+    <div class="col-lg-6">
+      <h4>Choose Resources</h4>
+      <h6>Common Resources</h6>
+      <ul class="list-inline">
+      {{#each currentState.availableCommonResources}}
+        <li><img src="{{imagePathForResource}}" title="{{this}}" alt="{{this}}" height="16" width="16"> {{#if needToPickCommon}}{{#if isUsersTurn}}<button class="pick-common btn btn-default">Select</button>{{/if}}{{/if}}</li>
+      {{/each}}
+      </ul>
+      <h6>Rare Resources</h6>
+      <ul class="list-inline">
+      {{#each currentState.availableRareResources}}
+        <li><img src="{{imagePathForResource}}" title="{{this}}" alt="{{this}}" height="16" width="16">{{#if needToPickCommon}}{{else}}{{#if isUsersTurn}}<button class="pick-rare btn btn-default">Select</button>{{/if}}{{/if}}</li>
+      {{/each}}
+      </ul>
+    </div>
+    <div class="col-lg-4">
+      <h4>MarketPlace</h4>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Cost</th>
+          </tr>
+        </thead>
+        {{#each marketplace}}
+          <tr>
+            <td>{{name}}</td>
+            <td>{{#each resourceCost}}<img src="{{imagePathForResource}}" title="{{this}}" alt="{{this}}" height="16" width="16" hspace="4">{{/each}}</td>
+          </tr>
+        {{/each}}
+      </table>
+    </div>
+  </div>
 </template>
 
 <template name="playStep">
@@ -612,7 +633,6 @@
     <li>End game screen</li>
     <li>Improve UX</li>
       <ul>
-        <li>Show marketplace costs when picking resources</li>
         <li>Add tips during resource picking about which resource you are making easy/excluding</li>
         <li>Show all stuff for a single player in one place rather than multiple tables</li>
         <li>Move modal actions prettier</li>

@@ -891,7 +891,27 @@ if (Meteor.isClient) {
         }
       }
       return false;
-    }
+    },
+
+    resourceCost: function() {
+      var marketplaceItem = this;
+      var resourceCost = [];
+      var i;
+      for(i = 0; i < marketplaceItem[BLUE]; i++) {
+        resourceCost.push(BLUE);
+      }
+      for(i = 0; i < marketplaceItem[GREEN]; i++) {
+        resourceCost.push(GREEN);
+      }
+      for(i = 0; i < marketplaceItem[RED]; i++) {
+        resourceCost.push(RED);
+      }
+      for(i = 0; i < marketplaceItem[PURPLE]; i++) {
+        resourceCost.push(PURPLE);
+      }
+
+      return resourceCost;
+    },
   });
 
   Template.setupStep.events({
