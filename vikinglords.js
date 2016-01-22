@@ -1283,7 +1283,135 @@ if (Meteor.isClient) {
 
       var currentUserPlayerCommon = currentUserPlayer.resourcePicks.common;
       return currentUserPlayer.stash[currentUserPlayerCommon] >= 2;
+    },
+
+    canConvertLootToGeld: function() {
+      var game = Template.parentData(0);
+      var currentUserPlayer = getUserPlayer(game);
+
+      var currentUserPlayerAvailableLoot = 0;
+	  currentUserPlayerAvailableLoot += currentUserPlayer.stash[BLUE];
+	  currentUserPlayerAvailableLoot += currentUserPlayer.stash[GREEN];
+	  currentUserPlayerAvailableLoot += currentUserPlayer.stash[RED];
+	  currentUserPlayerAvailableLoot += currentUserPlayer.stash[PURPLE];
+	  
+      return currentUserPlayerAvailableLoot >= 4;
+	  
+    },
+
+    canSkald: function() {
+      var game = Template.parentData(0);
+      var currentUserPlayer = getUserPlayer(game);  
+      return currentUserPlayer.stash[SKALD] >= 1;
+    },
+
+    canTavernConvert: function() {
+      var game = Template.parentData(0);
+      var currentUserPlayer = getUserPlayer(game);
+      return currentUserPlayer.structureUses[TAVERN] >= 1;	  
+    },
+
+    canMeadHallConvert: function() {
+      var game = Template.parentData(0);
+      var currentUserPlayer = getUserPlayer(game);
+      return currentUserPlayer.structureUses[MEAD_HALL] >= 1;
+      return true;
+	  
+    },
+	
+	canDefend: function() {
+      var game = Template.parentData(0);
+      var currentUserPlayer = getUserPlayer(game);  
+      return currentUserPlayer.stash[VIKING] >= 1;
+      return true;
+	  
+    },	
+	
+	canPillage: function() {
+      var game = Template.parentData(0);
+      var currentUserPlayer = getUserPlayer(game);  
+      return currentUserPlayer.stash[VIKING] >= 1;
+      return true;
+	  
+    },	
+	
+	// used for Smite offering
+	canSmite: function() {
+      // complex logic needed based on current setup
+      return true;
+	  
+    },
+	
+	// used for Valkyrie offering, need help determining logic
+	canValkyrie: function() {
+      // complex logic needed based on current setup
+      return true;
+	  
+    },
+
+	// used for marketplace
+    canPurchaseWithLoot: function() { 
+      // complex logic needed based on current setup
+      return true;
+	  
+    },
+
+	// used for shared tracks, need help following logic
+    canPurchaseWithGeld: function() {
+      // complex logic needed based on current setup
+      return true;
+	  
+    },
+
+    canGiveLootBlue: function() {
+      var game = Template.parentData(0);
+      var currentUserPlayer = getUserPlayer(game);
+      return currentUserPlayer.stash[BLUE] >= 1;
+    },
+	
+	canGiveLootGreen: function() {
+      var game = Template.parentData(0);
+      var currentUserPlayer = getUserPlayer(game);
+      return currentUserPlayer.stash[GREEN] >= 1;
+    },
+	
+	canGiveLootRed: function() {
+      var game = Template.parentData(0);
+      var currentUserPlayer = getUserPlayer(game);
+      return currentUserPlayer.stash[RED] >= 1;
+    },
+	
+	canGiveLootPurple: function() {
+      var game = Template.parentData(0);
+      var currentUserPlayer = getUserPlayer(game);
+      return currentUserPlayer.stash[PURPLE] >= 1;
+    },
+
+	// sloppy, re-using code from clicked-btn.pay-weregeld
+    canPayWeregeld: function() {
+      var game = Template.parentData(0);
+      var gameId = game._id;
+      var currentPlayerIndex = game.currentState.currentPlayerIndex;
+      var payeeId = event.target.value;
+
+      var players = game.currentState.players;
+      var player = players[currentPlayerIndex];
+      var payee;
+      for (var i = 0; i < players.length; i++) {
+        if (players[i].user._id === payeeId) {
+          payee = players[i];
+        }
+      }
+
+      var cost = player.stash[PRESTIGE] - payee.stash[PRESTIGE];
+      if (cost < 1) {
+        cost = 1;
+      }
+
+      return cost <= player.stash[GELD];	  
     }
+	
+	
   });
 
   Template.playStep.events({

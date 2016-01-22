@@ -233,25 +233,25 @@
             </td>
             <td class="text-center">
               {{structures.tavern}}
-              {{#if isUser}}
+              {{#if isUser}}{{#if canTavernConvert}}
                 <button class="activate-tavern btn btn-default">1 Rare to 1 Geld({{structureUses.tavern}} left)</button>
-              {{/if}}
+              {{/if}}{{/if}}
             </td>
             <td class="text-center">
               {{structures.meadhall}}
-              {{#if isUser}}
+              {{#if isUser}}{{#if canMeadHallConvert}}
                 <button class="activate-meadhall btn btn-default">1 Common to 1 Geld({{structureUses.meadhall}} left)</button>
-              {{/if}}
+              {{/if}}{{/if}}
             </td>
             <td class="text-center">
               {{structures.longboat}}
             </td>
             <td class="text-center">
               {{clansmen.skald}}
-              {{#if isUser}}{{#if isUsersTurn2}}
+              {{#if isUser}}{{#if isUsersTurn2}}{{#if canSkald}}
                 <button class="perform-skald btn btn-default">Perform</button>
                 <button class="sacrifice-skald btn btn-default">Sacrifice</button>
-              {{/if}}{{/if}}
+              {{/if}}{{/if}}{{/if}}
             </td>
             <td class="text-center">
               {{clansmen.viking}}
@@ -301,10 +301,18 @@
           <h6>Make a trading post selection</h6>
           {{#if currentPlayerTradingStep1}}
             <p>Which resource do you want to trade <b>away</b>?</p>
-            <button class="trade-away btn btn btn-default" value="blue">Blue</button>
-            <button class="trade-away btn btn-default" value="green">Green</button>
-            <button class="trade-away btn btn-default" value="red">Red</button>
-            <button class="trade-away btn btn-default" value="purple">Purple</button>
+			{{#if canGiveLootBlue}}
+              <button class="trade-away btn btn btn-default" value="blue">Blue</button>
+			{{/if}}
+			{{#if canGiveLootGreen}}
+              <button class="trade-away btn btn-default" value="green">Green</button>
+			{{/if}}
+			{{#if canGiveLootRed}}
+              <button class="trade-away btn btn-default" value="red">Red</button>
+			{{/if}}
+			{{#if canGiveLootPurple}}
+              <button class="trade-away btn btn-default" value="purple">Purple</button>
+			{{/if}}
           {{else}}
             <p>Which resource do you want to trade <b>for</b>?</p>
             <button class="trade-for btn btn-default" value="blue">Blue</button>
@@ -336,9 +344,11 @@
           {{/if}}
           {{#if currentPlayerDecidingHowToRaid}}
             <p>How do you want to attack?</p>
-            <button class="choose-how-to-raid btn btn-default" value="take">Take stuff</button>
             <button class="choose-how-to-raid btn btn-default" value="burn">Burn something</button>
-            <button class="choose-how-to-raid btn btn-default" value="both">Take stuff and burn something</button>
+			{{#if canPillage}}
+			  <button class="choose-how-to-raid btn btn-default" value="take">Take stuff</button>
+              <button class="choose-how-to-raid btn btn-default" value="both">Take stuff and burn something</button>
+			{{/if}}
           {{/if}}
           {{#if currentPlayerWaitingOnDefender}}
             <p>Waiting for defender to decide whether or not to defend.</p>
@@ -358,12 +368,12 @@
           {{/if}}
         {{/if}}
 
-        {{#if currentUserUnderAttack}}
+        {{#if currentUserUnderAttack}}{{#if canDefend}}
           <h6>Defend</h6>
           <p>Sacrifice a Viking to defend your village?</p>
           <button class="defend-attack btn btn-default" value="true">Yes</button>
           <button class="defend-attack btn btn-default" value="false">No</button>
-        {{/if}}
+        {{/if}}{{/if}}
 
         {{#if currentUserCollectingBounty}}
           <h6>Offering - Bounty</h6>
@@ -416,10 +426,18 @@
         {{#if currentUserBeingScourged}}
           <h6>Offering - Scourge</h6>
           <p>Choose a resource to destroy</p>
-          <button class="scourge-resource btn btn-default" value="blue">Blue</button>
-          <button class="scourge-resource btn btn-default" value="green">Green</button>
-          <button class="scourge-resource btn btn-default" value="red">Red</button>
-          <button class="scourge-resource btn btn-default" value="purple">Purple</button>
+		  {{#if canGiveLootBlue}}
+            <button class="scourge-resource btn btn-default" value="blue">Blue</button>
+		  {{/if}}
+		  {{#if canGiveLootGreen}}
+            <button class="scourge-resource btn btn-default" value="green">Green</button>
+		  {{/if}}
+		  {{#if canGiveLootRed}}
+            <button class="scourge-resource btn btn-default" value="red">Red</button>
+		  {{/if}}
+		  {{#if canGiveLootPurple}}
+            <button class="scourge-resource btn btn-default" value="purple">Purple</button>
+		  {{/if}}
         {{/if}}
       {{else}}
         <p>Nothing requires your urgent attention.</p>
@@ -497,12 +515,14 @@
       <h4>Weregeld</h4>
       <ul>
         {{#each currentUserWeregeld}}
+		  {{#if canPayWeregeld}}
           <li>
             {{user.name}}
             {{#if isUsersTurn2}}
               <button class="pay-weregeld btn btn-default" value="{{user._id}}">Pay</button>
             {{/if}}
           </li>
+		  {{/if}}
         {{/each}}
       </ul>
     </div>
